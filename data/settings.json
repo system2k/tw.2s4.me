@@ -1,0 +1,12 @@
+{
+	"port": 8080,
+	"useStatic": true,
+	"db": {
+		"path": "../data/data.sqlite3",
+		"chatMutePath": "./chat_mutes.json"
+	},
+	"log": {
+		"enabled": false,
+		"path": "./log.txt"
+	}
+}

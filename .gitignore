@@ -1,0 +1,6 @@
+node_modules/
+data/*.sql*
+data/*.db*
+package-lock.json
+/.vscode
+report.*.json
