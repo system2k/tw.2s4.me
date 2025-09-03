@@ -3259,7 +3259,7 @@
                     if (E[e(585)] = be,
                         kt(y = Math[e(433)](10 * Ce[e(235)] * v), g = Math[e(433)](20 * Ce[e(201)] * v), r, a),
                         tt[e(567)].checked && (gt(E),
-                            Mt((tt[e(280)][e(427)] || je == "") && anonIdShow ? `(${window.w.clientId})` : je, y, g, o)),
+                            Mt((tt[e(280)][e(427)] || je == "") && anonIdShow ? `(${window.w.clientId})` : (tt[e(280)][e(427)] ? "" : je), y, g, o)),
                         Je && $e[e(258)] && $e[e(571)]) {
                         E.fillStyle = e(491),
                             y = Math[e(433)](10 * Math[e(678)]($e[e(258)].x, $e.end.x) * v),
