@@ -296,9 +296,12 @@
 	</script>
 	<script>
 		const checkbox = document.getElementById('darkChat');
+		const rainbowTagsCheckbox = document.getElementById("rainbowTag");
 		const chatbox = document.getElementById('chatbox');
 		let darkMode = localStorage.getItem('darkMode') === 'true';
+		let rainbowTags = localStorage.getItem('rainbowTags') === 'true';
 		checkbox.checked = darkMode;
+		rainbowTagsCheckbox.checked = rainbowTags;
 
 		function storeOriginalColor(el) {
 			if (!el.dataset.originalColor && el.style.color) {
@@ -319,6 +322,7 @@
 			chatbox.style.backgroundColor = darkMode ? '#000' : '#fff';
 			chatbox.style.color = darkMode ? '#fff' : '#000';
 			chatbox.querySelectorAll('*').forEach(applyMode);
+			chatbox.classList[rainbowTagsCheckbox.checked ? "add" : "remove"]("animatedTags");
 			autoscroll();
 		}
 
@@ -329,6 +333,11 @@
 		checkbox.addEventListener('change', () => {
 			darkMode = checkbox.checked;
 			localStorage.setItem('darkMode', darkMode);
+			updateChatbox();
+		});
+		rainbowTagsCheckbox.addEventListener('change', () => {
+			rainbowTags = rainbowTagsCheckbox.checked;
+			localStorage.setItem('rainbowTags', rainbowTags);
 			updateChatbox();
 		});
 

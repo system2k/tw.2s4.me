@@ -1372,8 +1372,7 @@
                             break;
                         case document.getElementById('anonIdShow'):
                             ge = !0;
-                        case tt.rainbowTag:
-                            document.getElementById("chatbox").classList[tt.rainbowTag.checked ? "add" : "remove"]("animatedTags");
+                            break;
                         case lt:
                             document[t(628)](t(680))[t(270)][t(550)] = t(507),
                                 document[t(628)](t(459)).style.display = t(467);
