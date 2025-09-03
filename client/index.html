@@ -296,7 +296,6 @@
 	</script>
 	<script>
 		const checkbox = document.getElementById('darkChat');
-		const rainbowTag = document.getElementById("rainbowTag");
 		const chatbox = document.getElementById('chatbox');
 		let darkMode = localStorage.getItem('darkMode') === 'true';
 		checkbox.checked = darkMode;
@@ -331,10 +330,6 @@
 			darkMode = checkbox.checked;
 			localStorage.setItem('darkMode', darkMode);
 			updateChatbox();
-		});
-
-		rainbowTag.addEventListener('change', () => {
-			chatbox.classList[rainbowTag.checked ? "add" : "remove"]("animatedTags");
 		});
 
 		const observer = new MutationObserver(mutations => {
