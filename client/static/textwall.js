@@ -14,6 +14,7 @@
         }
         )()
     }
+    window.getMapping = r;
     (function (e, n) {
         for (var r = t, a = e(); ;)
             try {
@@ -339,7 +340,11 @@
                 copycolour: document[n(628)](n(261)),
                 copydecorations: document[n(628)](n(693)),
                 rainbow: document[n(628)]("rainbow"),
-                anonymous: document[n(628)](n(280))
+                anonymous: document[n(628)](n(280)),
+                darkChat: document.getElementById("darkChat"),
+                rainbowTag: document.getElementById("rainbowTag"),
+                fps: document.getElementById("fps"),
+                showFeedback: document.getElementById("showFeedback")
             };
             tt.showothercurs[n(427)] = !0,
                 tt[n(567)][n(427)] = !0,
@@ -477,6 +482,7 @@
                 var r = n;
                 return e[0] < t.minx || e[0] > t[r(298)] || e[1] < t.miny || e[1] > t[r(681)]
             }
+
             function wt(e) {
                 var t = n;
                 return we[t(520)](e)[t(630)] || e[t(668)](",")
@@ -524,6 +530,7 @@
                 Ee[r(361)](e) ? 0 == Ee[r(520)](e) && t && Ee[r(644)](e, t) : (ke[r(343)](e),
                     Ee[r(644)](e, t))
             }
+            window.It = It;
             var Ct, At, Tt;
             try {
                 Ct = RegExp(n(473), "u")
@@ -1782,10 +1789,14 @@
                 o[0][e(482)]("~") && "" == (t = o[0][e(217)]("~", "")) && (t = e(391)),
                     2 == o[e(500)] && (r = o[1]),
                     Cn(t, r)
-                // always send { ping: true } to enable ping messages
+                // always send { ping: true } to display ping messages
                 setInterval(() => {
                     NKe = performance.now();
-                    a && a.send(Or({ ping: true }));
+                    // ensure it's sent at OPEN
+
+                    if (a.readyState === 1) {
+                        a && a.send(Or({ ping: true }));
+                    }
                 }, 1000);
             }
 
@@ -1986,6 +1997,7 @@
                                     var v = String[t(438)](u[s][f])
                                         , h = u[s][f + 1]
                                         , y = u[s][f + 2];
+
                                     E[t(704)][h] == v && E[t(212)][h] == y || (E[t(704)][h] = v,
                                         E[t(212)][h] = y,
                                         It(d, Dt(h))),
@@ -2095,7 +2107,7 @@
                             A.n = I.n != null && I.n !== "" ? I.n : `(${C})`,
                             ge = !0,
                             On();
-                        
+
                         break;
                     case "pong":
                         OKe = performance[t(430)]();
@@ -2474,8 +2486,9 @@
                 var o = n;
                 tt[o(577)].checked && (r = 0),
                     r = Zr(r)[0],
-                    xt([e, t], bt(20)) || Ne[o(398)]([e, t, .1, r, a])
+                    xt([e, t], bt(20)) || Ne[o(398)]([e, t, tt["showFeedback"].checked ? .1 : 0, r, a])
             }
+
             function Xn() {
                 Be = [],
                     Fe = []
@@ -2970,6 +2983,35 @@
             window.Tile.protected = function (e, t) {
                 return Tile.exists(e, t) && Tile.get(e, t).protected
             }
+            window.Tile.saveBlob = function (e, t) {
+                var r = n;
+                if (!we[r(361)](e + "," + t)) return null;
+
+                var tile = we.get(e + "," + t);
+                if (!tile || !tile.img) return null;
+
+                var img = tile.img;
+
+                var canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                canvas.toBlob(function (blob) {
+                    if (!blob) return;
+
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = `tile_${e}_${t}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 'image/png');
+            };
+
             window.w.goto = vr;
             window.w.tp = Zn;
             window.w.cursors = Pe;
@@ -3396,6 +3438,7 @@
                     i = Math[r(227)](i, 0),
                     "#" + zr(a.toString(16), 2) + zr(o.toString(16), 2) + zr(i.toString(16), 2)
             }
+            window.Xr = Xr;
             function zr(e, t) {
                 for (; e.length < t;)
                     e = "0" + e;

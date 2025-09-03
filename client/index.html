@@ -92,10 +92,25 @@
 			<input id="rainbow" type="checkbox">
 			<label for="rainbow">Rainbow text</label><br>
 
-			<input type="checkbox" id="themeToggle">
-			<label for="themeToggle">Dark chat</label><br><br>
+			<input type="checkbox" id="darkChat">
+			<label for="darkChat">Dark chat</label><br>
 
+			<input type="checkbox" id="rainbowTag">
+			<label for="rainbowTag">Show rainbow tag animation</label><br>
 
+			<input type="checkbox" id="anonIdShow">
+			<label for="anonIdShow">Show anonymous IDs</label><br>
+
+			<input type="checkbox" id="fps">
+			<label for="showFPS">Show FPS</label><br>
+			
+			<input type="checkbox" id="showFeedback">
+			<label for="showFeedback">Show typing feedback</label><br><br>
+			<button id="clearChat">
+				<label for="clearChat">Clear chats</label>
+			</button>
+			<br />
+			<br />
 			<label for="zoom">Zoom: </label><input type="range" min="5" max="30" value="10" id="zoom"><br><br>
 			<label for="fontselect">Font: </label><select id="fontselect"></select><br>
 			<fieldset id="fontmenu" class="hidden">
@@ -280,70 +295,131 @@
 		}*/
 	</script>
 	<script>
-		const checkbox = document.getElementById('themeToggle');
-const chatbox = document.getElementById('chatbox');
-let darkMode = localStorage.getItem('darkMode') === 'true';
-checkbox.checked = darkMode;
+		const checkbox = document.getElementById('darkChat');
+		const chatbox = document.getElementById('chatbox');
+		let darkMode = localStorage.getItem('darkMode') === 'true';
+		checkbox.checked = darkMode;
 
-// Store original color if not stored
-function storeOriginalColor(el) {
-    if (!el.dataset.originalColor && el.style.color) {
-        el.dataset.originalColor = el.style.color;
-    }
-}
+		function storeOriginalColor(el) {
+			if (!el.dataset.originalColor && el.style.color) {
+				el.dataset.originalColor = el.style.color;
+			}
+		}
 
-// Apply mode to element based on original color
-function applyMode(el) {
-    storeOriginalColor(el);
-    if (!el.dataset.originalColor) return;
+		function applyMode(el) {
+			storeOriginalColor(el);
+			if (!el.dataset.originalColor) return;
 
-    const original = el.dataset.originalColor.replace(/\s+/g,'').toLowerCase();
-    if (original === 'rgb(0,0,0)') el.style.color = darkMode ? '#fff' : '#000';
-    else if (original === 'rgb(255,255,255)') el.style.color = darkMode ? '#000' : '#fff';
-}
+			const original = el.dataset.originalColor.replace(/\s+/g, '').toLowerCase();
+			if (original === 'rgb(0,0,0)') el.style.color = darkMode ? '#fff' : '#000';
+			else if (original === 'rgb(255,255,255)') el.style.color = darkMode ? '#000' : '#fff';
+		}
 
-// Update chatbox and all children
-function updateChatbox() {
-    chatbox.style.backgroundColor = darkMode ? '#000' : '#fff';
-    chatbox.style.color = darkMode ? '#fff' : '#000';
-    chatbox.querySelectorAll('*').forEach(applyMode);
-    autoscroll();
-}
+		function updateChatbox() {
+			chatbox.style.backgroundColor = darkMode ? '#000' : '#fff';
+			chatbox.style.color = darkMode ? '#fff' : '#000';
+			chatbox.querySelectorAll('*').forEach(applyMode);
+			autoscroll();
+		}
 
-// Always scroll to bottom
-function autoscroll() {
-    chatbox.scrollTop = chatbox.scrollHeight;
-}
+		function autoscroll() {
+			chatbox.scrollTop = chatbox.scrollHeight;
+		}
 
-// Toggle dark mode
-checkbox.addEventListener('change', () => {
-    darkMode = checkbox.checked;
-    localStorage.setItem('darkMode', darkMode);
-    updateChatbox();
-});
+		checkbox.addEventListener('change', () => {
+			darkMode = checkbox.checked;
+			localStorage.setItem('darkMode', darkMode);
+			updateChatbox();
+		});
 
-// Observe new messages
-const observer = new MutationObserver(mutations => {
-    mutations.forEach(m => {
-        m.addedNodes.forEach(node => {
-            if (node.nodeType === 1) {
-                node.classList.add('fade-in');
-                applyMode(node);
-                node.querySelectorAll('*').forEach(applyMode);
-                // Trigger fade-in
-                requestAnimationFrame(() => node.classList.add('show'));
-                autoscroll();
-            }
-        });
-    });
-});
+		const observer = new MutationObserver(mutations => {
+			mutations.forEach(m => {
+				m.addedNodes.forEach(node => {
+					if (node.nodeType === 1) {
+						node.classList.add('fade-in');
+						applyMode(node);
+						node.querySelectorAll('*').forEach(applyMode);
+						// Trigger fade-in
+						requestAnimationFrame(() => node.classList.add('show'));
+						autoscroll();
+					}
+				});
+			});
+		});
 
-observer.observe(chatbox, { childList: true, subtree: true });
-
-// Apply initial mode
-updateChatbox();
+		observer.observe(chatbox, { childList: true, subtree: true });
+		updateChatbox();
 	</script>
 	<span id="ping">0ms</span>
+	<span id="fpsc">999</span>
+	<script>
+		let lastTime = performance.now();
+		let frameCount = 0;
+
+		function getColor(fps) {
+			if (fps >= 1 && fps < 5) return "#8B0000";       // dark red
+			if (fps >= 5 && fps < 15) return "#FF0000";      // red
+			if (fps >= 15 && fps < 30) return "#FF7F7F";     // light red
+			if (fps >= 30 && fps < 40) return "#FF8C00";     // very orange
+			if (fps >= 40 && fps < 60) return "#FFA500";     // orange
+			if (fps >= 60 && fps < 144) return "#00FF00";    // green
+			if (fps === 144) return "#00FFFF";               // cyan
+			if (fps > 144) return "#008B8B";                 // dark cyan
+			return "#00FF00";                                // fallback green
+		}
+
+		function updateFPS() {
+			const now = performance.now();
+			frameCount++;
+
+			if (now - lastTime >= 1000) { // update every second
+				const fps = frameCount;
+				const fpsElement = document.getElementById('fpsc');
+				fpsElement.textContent = fps;
+				fpsElement.style.color = getColor(fps);
+
+				frameCount = 0;
+				lastTime = now;
+			}
+
+			requestAnimationFrame(updateFPS);
+		}
+
+		updateFPS();
+		const cb = document.getElementById("fps");
+
+		cb.checked = localStorage.getItem("showFps") === "true";
+
+		function updateCheck() {
+			localStorage.setItem("showFps", cb.checked);
+			const fpsElement = document.getElementById('fpsc');
+			if (fpsElement) fpsElement.style.display = cb.checked ? 'block' : 'none';
+		}
+
+
+		cb.addEventListener("click", updateCheck);
+
+
+		updateCheck();
+		document.getElementById("clearChat").onclick = function () {
+			if (confirm("Are you sure you want to clear all messages?")) {
+				var chatbox = document.getElementById("chatbox");
+				Array.from(chatbox.children).forEach(function (child) {
+					child.remove();
+				});
+			}
+		}
+		const feedback = document.getElementById("showFeedback")
+
+		feedback.checked = localStorage.getItem("showFeedback") === "true"
+
+		function updateFeedback() {
+			localStorage.setItem("showFeedback", feedback.checked);
+		}
+
+		updateFeedback();
+		feedback.onclick = updateFeedback;
+	</script>
 </body>
 
 </html>
