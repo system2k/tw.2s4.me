@@ -1370,6 +1370,8 @@
                                 Re = !0,
                                 ge = !0;
                             break;
+                        case document.getElementById('anonIdShow'):
+                            ge = !0;
                         case lt:
                             document[t(628)](t(680))[t(270)][t(550)] = t(507),
                                 document[t(628)](t(459)).style.display = t(467);
@@ -1927,6 +1929,10 @@
                     , r = new Uint8Array(e[t(698)]).buffer
                     , a = Rr(new Uint8Array(r));
                 switch (Object[t(611)](a)[0]) {
+                    case "id":
+                        var id = a.id;
+                        window.w.clientId = id;
+                        break;
                     case "b":
                         var i = a.b;
                         Yt = {
@@ -2091,7 +2097,8 @@
                             n: "",
                             l: [0, 0],
                             rawx: 0,
-                            rawy: 0
+                            rawy: 0,
+                            id: C
                         });
                         var A = Pe[t(520)](C);
                         window.w.emit("cursor", {
@@ -2100,13 +2107,18 @@
                             c: A.c,
                             l: A.l
                         });
-                        null != I.l && (A.l = I.l,
-                            tt[t(223)][t(427)] || (A[t(235)] = A.l[0],
-                                A[t(201)] = A.l[1])),
-                            null != I.c && (A.c = I.c),
-                            A.n = I.n != null && I.n !== "" ? I.n : `(${C})`,
-                            ge = !0,
-                            On();
+                        null != I.l &&
+                        (
+                            A.l = I.l,
+                            tt[t(223)][t(427)] ||
+                            (A[t(235)] = A.l[0], A[t(201)] = A.l[1])
+                        ),
+                        null != I.c &&
+                        (A.c = I.c),
+                        null != I.n &&
+                        (A.n = I.n),
+                        ge = !0,
+                        On();
 
                         break;
                     case "pong":
@@ -3206,6 +3218,7 @@
                                 t[e(572)] && (E[e(585)] = e(281),
                                     E[e(527)](y - 2 * v, g - 2 * v, Math[e(262)](r) + 4 * v, Math.round(a) + 4 * v));
                                 var p = t.c;
+                                var anonIdShow = document.getElementById('anonIdShow').checked;
                                 tt.disablecolour[e(427)] && (p = 0),
                                     0 == p && xe && (p = se[e(500)]),
                                     E[e(585)] = me[p],
@@ -3216,7 +3229,7 @@
                                         u = void 0,
                                         c = n,
                                         l = 20 * Math[c(437)](i[0] / 20) + "," + 10 * Math.floor(i[1] / 10),
-                                        (u = we[c(520)](l)) && u.protected && 0 == j) || Mt(t.n, y, g, o)
+                                        (u = we[c(520)](l)) && u.protected && 0 == j) || Mt(t.n != "" || !anonIdShow ? t.n : `(${t.id})`, y, g, o)
                             }
                         }
                     }
@@ -3236,10 +3249,11 @@
                         }
                         E[e(527)](x, w, r, a)
                     }
+                    var anonIdShow = document.getElementById('anonIdShow').checked;
                     if (E[e(585)] = be,
                         kt(y = Math[e(433)](10 * Ce[e(235)] * v), g = Math[e(433)](20 * Ce[e(201)] * v), r, a),
-                        tt[e(567)].checked && !tt[e(280)][e(427)] && (gt(E),
-                            Mt(je, y, g, o)),
+                        tt[e(567)].checked && (gt(E),
+                            Mt((tt[e(280)][e(427)] || je == "") && anonIdShow ? `(${window.w.clientId})` : je, y, g, o)),
                         Je && $e[e(258)] && $e[e(571)]) {
                         E.fillStyle = e(491),
                             y = Math[e(433)](10 * Math[e(678)]($e[e(258)].x, $e.end.x) * v),

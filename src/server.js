@@ -1126,6 +1126,7 @@ function init_ws() {
 
 		clientRecord[clientId] = sdata;
 		ws.sdata = sdata;
+		send(ws, encodeMsgpack({ id: clientId }));
 
 		ws.on("message", function (message, binary) {
 
