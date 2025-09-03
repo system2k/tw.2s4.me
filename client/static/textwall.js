@@ -1372,6 +1372,8 @@
                             break;
                         case document.getElementById('anonIdShow'):
                             ge = !0;
+                        case tt.rainbowTag:
+                            document.getElementById("chatbox").classList[tt.rainbowTag.checked ? "add" : "remove"]("animatedTags");
                         case lt:
                             document[t(628)](t(680))[t(270)][t(550)] = t(507),
                                 document[t(628)](t(459)).style.display = t(467);
@@ -1872,10 +1874,6 @@
                 ping.style.color = color;
             }
             let hue = 0;
-            setInterval(() => {
-                hue = (hue + 10) % 360;
-
-            }, 100);
             window.w = {};
             window.elem = tt;
             window.w.events = {};
@@ -2156,10 +2154,19 @@
                                 container.style.marginRight = "4px";
                                 container.textContent = "[ADMIN]";
 
-                                setInterval(() => {
-
-                                    container.style.color = `hsl(${hue}, 100%, 50%)`;
-                                }, 100);
+                                container.classList.add("adminTag");
+                                // sync them up
+                                
+                                container.addEventListener("animationstart", () => {
+                                    var otherTag = document.querySelector(".adminTag");
+                                    var anim = container.getAnimations();
+                                    if (otherTag) {
+                                        var otherAnim = otherTag.getAnimations();
+                                        if (otherAnim.length) {
+                                            anim[0].startTime = otherAnim[0].startTime;
+                                        }
+                                    }
+                                }, { once: true });
 
 
 
