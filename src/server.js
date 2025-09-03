@@ -6,7 +6,8 @@ var ws = require("ws");
 var sql = require("better-sqlite3");
 var crypto = require("crypto");
 var express = require("express");
-
+var path = require("path"); // essential
+var anonymous = [] // so suspicious!
 var settings = JSON.parse(fs.readFileSync("../data/settings.json"));
 
 console.log("Starting server...");
@@ -20,7 +21,7 @@ var db = sql(settings.db.path);
 
 var pw_encryption = "sha512WithRSAEncryption";
 function encryptHash(pass, salt) {
-	if(!salt) {
+	if (!salt) {
 		salt = crypto.randomBytes(10).toString("hex");
 	}
 	var hsh = crypto.createHmac(pw_encryption, salt).update(pass).digest("hex");
@@ -29,10 +30,10 @@ function encryptHash(pass, salt) {
 }
 
 function checkHash(hash, pass) {
-	if(typeof pass !== "string") return false;
-	if(typeof hash !== "string") return false;
+	if (typeof pass !== "string") return false;
+	if (typeof hash !== "string") return false;
 	hash = hash.split("$");
-	if(hash.length !== 3) return false;
+	if (hash.length !== 3) return false;
 	return encryptHash(pass, hash[1]) === hash.join("$");
 }
 
@@ -588,26 +589,33 @@ function checkHash(hash, pass) {
 })();
 
 
-
 var httpServer;
 async function runserver() {
 	var twrApp = express();
 	httpServer = http.createServer(twrApp);
 
-	if(settings.useStatic) {
+	if (settings.useStatic) {
 		twrApp.use(express.static(staticPath));
 	}
 
-	httpServer.listen(port, function() {
+	// catch-all route to index.html
+	twrApp.get(/^\/.*$/, (req, res) => {
+
+		res.sendFile('index.html', { root: staticPath });
+	});
+
+	httpServer.listen(port, function () {
 		var addr = httpServer.address();
 		console.log("TWR server is hosted on " + addr.address + ":" + addr.port);
 	});
+
 	init_ws();
 }
 
+
 function is_whole_number(x) {
 	var isNumber = typeof x === "number" && !isNaN(x) && isFinite(x)
-	if(isNumber) {
+	if (isNumber) {
 		return x === Math.trunc(x)
 	}
 	return false
@@ -622,15 +630,15 @@ var wss;
 var objects = {};
 
 function broadcast(data, exclusion) {
-	wss.clients.forEach(function(ws) {
-		if(ws == exclusion) return;
+	wss.clients.forEach(function (ws) {
+		if (ws == exclusion) return;
 		send(ws, data);
 	});
 }
 function send(ws, data) {
 	try {
 		ws.send(data);
-	} catch(e) {
+	} catch (e) {
 		return;
 	}
 }
@@ -654,11 +662,11 @@ function parseChar(chr) {
 }
 
 function validateUsername(str) {
-	if(str.length < 1 || str.length > 64) return false;
+	if (str.length < 1 || str.length > 64) return false;
 	var validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.";
-	for(var i = 0; i < str.length; i++) {
+	for (var i = 0; i < str.length; i++) {
 		var chr = str[i];
-		if(!validChars.includes(chr)) return false;
+		if (!validChars.includes(chr)) return false;
 	}
 	return true;
 }
@@ -666,24 +674,21 @@ function validateUsername(str) {
 function generateToken() {
 	var set = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/+";
 	var str = "";
-	for(var i = 0; i < 48; i++) {
+	for (var i = 0; i < 48; i++) {
 		str += set[Math.floor(Math.random() * set.length)];
 	}
 	return str;
 }
 
 function san_nbr(x) {
-	if(typeof x == "string") x -= 0;
-	if(typeof x == "bigint") x = Number(x);
-	if(x === true) x = 1;
-	if(x == Infinity) x = 9007199254740991;
-	if(x == -Infinity) x = -9007199254740991;
-	if(typeof x != "number") x = 0;
-	if(!x || isNaN(x) || !isFinite(x)) x = 0;
-	if(x > 9007199254740991) x = 9007199254740991;
-	if(x < -9007199254740991) x = -9007199254740991;
-	return Math.trunc(x);
+	if (typeof x === "bigint") x = Number(x);
+	if (typeof x === "boolean") x = x ? 1 : 0;
+	if (typeof x === "string") x = Number(x);
+	if (!isFinite(x)) x = 0;
+	x = Math.trunc(Math.max(Math.min(x, 9007199254740991), -9007199254740991));
+	return x;
 }
+
 
 var onlineCount = 0;
 
@@ -693,7 +698,7 @@ var modifiedChunks = {};
 
 function commitChunks() {
 	db.prepare("BEGIN");
-	for(var t in modifiedChunks) {
+	for (var t in modifiedChunks) {
 		var tup = t.split(",");
 		var worldId = parseInt(tup[0]);
 		var chunkX = parseInt(tup[1]);
@@ -701,11 +706,11 @@ function commitChunks() {
 		var data = chunkCache[t];
 		var text = data.char.join("");
 		var color = "";
-		for(var i = 0; i < data.color.length; i++) {
+		for (var i = 0; i < data.color.length; i++) {
 			color += String.fromCharCode(data.color[i] + 192);
 		}
 		var prot = data.protected;
-		if(data.exists) {
+		if (data.exists) {
 			db.prepare("UPDATE chunks SET text=?, colorFmt=?, protected=? WHERE world_id=? AND x=? AND y=?").run(text, color, Number(prot), worldId, chunkX, chunkY);
 		} else {
 			data.exists = true;
@@ -717,31 +722,31 @@ function commitChunks() {
 	db.prepare("COMMIT");
 }
 
-setInterval(function() {
+setInterval(function () {
 	commitChunks();
 }, 1000 * 10);
 
-setInterval(function() {
+setInterval(function () {
 	flushCache();
 }, 1000 * 60 * 10);
 
 function flushCache() {
-	for(var t in chunkCache) {
-		if(modifiedChunks[t]) continue;
+	for (var t in chunkCache) {
+		if (modifiedChunks[t]) continue;
 		delete chunkCache[t];
 	}
 }
 
 function getChunk(worldId, x, y, canCreate) {
 	var tuple = worldId + "," + x + "," + y;
-	if(chunkCache[tuple]) {
+	if (chunkCache[tuple]) {
 		return chunkCache[tuple];
 	} else {
 		var data = db.prepare("SELECT * FROM chunks WHERE world_id=? AND x=? AND y=?").get(worldId, x, y);
-		if(data) {
+		if (data) {
 			var colorRaw = data.colorFmt;
 			var colorArray = [];
-			for(var i = 0; i < colorRaw.length; i++) {
+			for (var i = 0; i < colorRaw.length; i++) {
 				colorArray.push(colorRaw[i].charCodeAt() - 192);
 			}
 			var cdata = {
@@ -754,11 +759,11 @@ function getChunk(worldId, x, y, canCreate) {
 			return cdata;
 		} else {
 			var cdata = {
-				char: new Array(10*20).fill(" "),
-				color: new Array(10*20).fill(0),
+				char: new Array(10 * 20).fill(" "),
+				color: new Array(10 * 20).fill(0),
 				protected: false
 			};
-			if(canCreate) {
+			if (canCreate) {
 				chunkCache[tuple] = cdata;
 			}
 			return cdata;
@@ -766,11 +771,11 @@ function getChunk(worldId, x, y, canCreate) {
 	}
 }
 function writeChunk(worldId, x, y, idx, char, colorFmt, isMember) {
-	if(char == 0 || (char >= 0xD800 && char <= 0xDFFF)) return false;
+	if (char == 0 || (char >= 0xD800 && char <= 0xDFFF)) return false;
 	var tuple = worldId + "," + x + "," + y;
 	var chunk = getChunk(worldId, x, y, true);
 	var prot = chunk.protected;
-	if(prot && !isMember) return false;
+	if (prot && !isMember) return false;
 	chunk.char[idx] = String.fromCodePoint(char);
 	chunk.color[idx] = colorFmt;
 	modifiedChunks[tuple] = true;
@@ -786,8 +791,8 @@ function toggleProtection(worldId, x, y) {
 function clearChunk(worldId, x, y) {
 	var tuple = worldId + "," + x + "," + y;
 	var chunk = getChunk(worldId, x, y, false);
-	if(!chunk.exists) return;
-	for(var i = 0; i < chunk.char.length; i++) {
+	if (!chunk.exists) return;
+	for (var i = 0; i < chunk.char.length; i++) {
 		chunk.char[i] = " ";
 		chunk.color[i] = 0;
 	}
@@ -797,7 +802,7 @@ function clearChunk(worldId, x, y) {
 function sendOwnerStuff(ws, connectedWorldId, connectedWorldNamespace) {
 	var memberList = db.prepare("SELECT * FROM members WHERE world_id=?").all(connectedWorldId);
 	var normMemberList = [];
-	for(var i = 0; i < memberList.length; i++) {
+	for (var i = 0; i < memberList.length; i++) {
 		normMemberList.push(memberList[i].username);
 	}
 	send(ws, encodeMsgpack({
@@ -809,14 +814,14 @@ function sendOwnerStuff(ws, connectedWorldId, connectedWorldNamespace) {
 function sendWorldList(ws, connectedWorldId, connectedWorldNamespace, noPrivate) {
 	var worldList = db.prepare("SELECT * FROM worlds WHERE namespace=? COLLATE NOCASE").all(connectedWorldNamespace);
 	var normWorldList = [];
-	for(var i = 0; i < worldList.length; i++) {
+	for (var i = 0; i < worldList.length; i++) {
 		var world = worldList[i];
 		var wname = world.name;
 		var attr = JSON.parse(world.attributes);
-		if(noPrivate && attr.private) continue;
+		if (noPrivate && attr.private) continue;
 		normWorldList.push(wname, Boolean(attr.private));
 	}
-	
+
 	send(ws, encodeMsgpack({
 		wl: normWorldList
 	}));
@@ -824,14 +829,14 @@ function sendWorldList(ws, connectedWorldId, connectedWorldNamespace, noPrivate)
 
 function editWorldAttr(worldId, prop, value) {
 	var world = db.prepare("SELECT attributes FROM worlds WHERE id=?").get(worldId);
-	if(!world) return;
+	if (!world) return;
 	var attr = JSON.parse(world.attributes);
 	attr[prop] = value;
 	db.prepare("UPDATE worlds SET attributes=? WHERE id=?").run(JSON.stringify(attr), worldId);
-	
-	wss.clients.forEach(function(sock) {
-		if(!sock || !sock.sdata) return;
-		if(sock.sdata.connectedWorldId == worldId) {
+
+	wss.clients.forEach(function (sock) {
+		if (!sock || !sock.sdata) return;
+		if (sock.sdata.connectedWorldId == worldId) {
 			sock.sdata.worldAttr[prop] = Boolean(value);
 		}
 	});
@@ -850,7 +855,7 @@ function evictClient(ws) {
 	worldBroadcast(ws.sdata.connectedWorldId, encodeMsgpack({
 		rc: ws.sdata.clientId
 	}), ws);
-				
+
 	ws.sdata.connectedWorldNamespace = "textwall";
 	ws.sdata.connectedWorldName = "main";
 	ws.sdata.connectedWorldId = 1;
@@ -873,20 +878,20 @@ function evictClient(ws) {
 }
 
 function worldBroadcast(connectedWorldId, data, excludeWs) {
-	wss.clients.forEach(function(sock) {
-		if(!sock || !sock.sdata) return;
-		if(sock == excludeWs) return;
-		if(sock.sdata.connectedWorldId == connectedWorldId) {
+	wss.clients.forEach(function (sock) {
+		if (!sock || !sock.sdata) return;
+		if (sock == excludeWs) return;
+		if (sock.sdata.connectedWorldId == connectedWorldId) {
 			send(sock, data);
 		}
 	});
 }
 
 function dumpCursors(ws) {
-	wss.clients.forEach(function(sock) {
-		if(!sock || !sock.sdata) return;
-		if(sock == ws) return;
-		if(sock.sdata.connectedWorldId == ws.sdata.connectedWorldId) {
+	wss.clients.forEach(function (sock) {
+		if (!sock || !sock.sdata) return;
+		if (sock == ws) return;
+		if (sock.sdata.connectedWorldId == ws.sdata.connectedWorldId) {
 			send(ws, encodeMsgpack({
 				cu: {
 					id: sock.sdata.clientId,
@@ -902,7 +907,7 @@ function dumpCursors(ws) {
 function encodeMsgpack(data) {
 	try {
 		return msgpack.encode(data);
-	} catch(e) {
+	} catch (e) {
 		return new Uint8Array([]);
 	}
 }
@@ -931,24 +936,25 @@ var rateLimits = {
 	"dw": 2,
 	"namechange": 1,
 	"passchange": 1,
-	"c": 15
+	"c": 15,
+	"ping": 60000000000000000000 // effectively unlimited
 };
 var rateLimitsByIp = {};
 function isRateLimited(ip, packetType) {
-	if(!rateLimits[packetType]) return false;
+	if (!rateLimits[packetType]) return false;
 	let period = Math.floor(Date.now() / 1000);
-	if(!rateLimitsByIp[ip]) {
+	if (!rateLimitsByIp[ip]) {
 		rateLimitsByIp[ip] = {};
 	}
-	if(!rateLimitsByIp[ip][packetType]) {
+	if (!rateLimitsByIp[ip][packetType]) {
 		rateLimitsByIp[ip][packetType] = [1, period];
 		return false;
 	}
 	let ipLim = rateLimitsByIp[ip][packetType];
 	let max = rateLimits[packetType];
-	if(ipLim[1] == period) {
-		if(ipLim[0] >= max) {
-			 return true;
+	if (ipLim[1] == period) {
+		if (ipLim[0] >= max) {
+			return true;
 		} else {
 			ipLim[0]++;
 			return false;
@@ -964,12 +970,18 @@ var clientRecord = {};
 var chatMutesByIP = {};
 var chatMutesByUserIDs = {};
 var muteMutated = false;
+let canvasMutesByIP = {};
+let canvasMutesByUserIDs = {};
+let fullMuteByIP = {};
+let fullMuteByUserIDs = {};
+let canvasMuteMutated = false;
+let fullMuteMutated = false;
 
 function clearClientRecord() {
-	for(let c in clientRecord) {
+	for (let c in clientRecord) {
 		let cli = clientRecord[c];
-		if(!cli.isConnected) {
-			if(Date.now() - cli.connectTime > 1000 * 60 * 30) {
+		if (!cli.isConnected) {
+			if (Date.now() - cli.connectTime > 1000 * 60 * 30) {
 				delete clientRecord[c];
 			}
 		}
@@ -987,7 +999,7 @@ function loadMutes() {
 	var fileMuteData;
 	try {
 		fileMuteData = fs.readFileSync(muteDbPath);
-	} catch(e) {
+	} catch (e) {
 		console.log("No mutes file found");
 		return; // no mutes...
 	}
@@ -997,13 +1009,62 @@ function loadMutes() {
 }
 
 loadMutes();
+const canvasMuteDbPath = settings.db.canvasMutePath;
 
-let memClrInterval = setInterval(function() {
+function saveCanvasMutes() {
+	fs.writeFileSync(canvasMuteDbPath, JSON.stringify({
+		ip: canvasMutesByIP,
+		id: canvasMutesByUserIDs
+	}, null, "\t"));
+}
+
+function loadCanvasMutes() {
+	try {
+		const data = JSON.parse(fs.readFileSync(canvasMuteDbPath));
+		canvasMutesByIP = data.ip;
+		canvasMutesByUserIDs = data.id;
+	} catch (e) {
+		console.log("No canvas mutes file found");
+		return; // no canvas mutes...
+	}
+}
+function canvasMuted(sdata) {
+	if (!sdata) return false;
+
+	let cli = clientRecord[sdata.clientId];
+	if (!cli) return false;
+	if (canvasMutesByUserIDs[cli.authUserId]) return true;
+	if (canvasMutesByIP[cli.ipAddr]) return true;
+
+	return false;
+}
+
+function fullyMuted(sdata) {
+	if (!sdata) return false;
+
+	let cli = clientRecord[sdata.clientId];
+	if (!cli) return false;
+
+	if (fullMuteByUserIDs[cli.authUserId]) return true;
+	if (fullMuteByIP[cli.ipAddr]) return true;
+
+	return false;
+}
+loadCanvasMutes();
+
+let saveCanvasMuteInterval = setInterval(() => {
+	if (canvasMuteMutated) {
+		canvasMuteMutated = false;
+		saveCanvasMutes();
+	}
+}, 5000);
+
+let memClrInterval = setInterval(function () {
 	clearClientRecord();
 }, 1000 * 60);
 
-let saveMuteInterval = setInterval(function() {
-	if(muteMutated) {
+let saveMuteInterval = setInterval(function () {
+	if (muteMutated) {
 		muteMutated = false;
 		saveMutes();
 	}
@@ -1011,37 +1072,37 @@ let saveMuteInterval = setInterval(function() {
 
 function init_ws() {
 	wss = new ws.Server({ server: httpServer });
-	
-	wss.on("connection", function(ws, req) {
+
+	wss.on("connection", function (ws, req) {
 		var ipAddr = ws._socket.remoteAddress;
 		//console.log(ipAddr, JSON.stringify(req.headers))
-		if(!ipAddr) return;
-		if(ipAddr.startsWith("::ffff:")) {
+		if (!ipAddr) return;
+		if (ipAddr.startsWith("::ffff:")) {
 			ipAddr = ipAddr.slice("::ffff:".length);
 		}
-		if(ipAddr == "127.0.0.1") {
+		if (ipAddr == "127.0.0.1") {
 			ipAddr = req.headers["x-real-ip"];//req.headers["CF-Connecting-IP"] || req.headers["cf-connecting-ip"];
-			if(!ipAddr) ipAddr = Math.random().toString();
+			if (!ipAddr) ipAddr = Math.random().toString();
 		}
 
-		if(!ipConnLim[ipAddr]) {
+		if (!ipConnLim[ipAddr]) {
 			ipConnLim[ipAddr] = [0, 0, 0]; // connections, blocks placed in current second period, second period
 		}
 		var connObj = ipConnLim[ipAddr];
-		
-		if(connObj[0] >= 15) {
+
+		if (connObj[0] >= 15) {
 			ws.close();
 			return;
 		}
-		
+
 		console.log("New client:", ipAddr);
 		connObj[0]++;
-		
-		
+
+
 		onlineCount++;
-		
+
 		let clientId = Math.floor(Math.random() * 1000000000).toString();
-		
+
 		var sdata = {
 			connectTime: Date.now(),
 			ipAddr: ipAddr,
@@ -1059,79 +1120,93 @@ function init_ws() {
 			cursorY: 0,
 			cursorColor: 0,
 			cursorAnon: false,
-			worldAttr: {}
+			worldAttr: {},
+
 		};
-		
+
 		clientRecord[clientId] = sdata;
 		ws.sdata = sdata;
-		
-		ws.on("message", function(message, binary) {
-			
-			if(!binary) return;
-			
-			
+
+		ws.on("message", function (message, binary) {
+
+			if (!binary) return;
+
+
 			var per = Math.floor(Date.now() / 1000);
-			if(connObj[2] == per) {
-				if(connObj[1] >= 100) return;
+			if (connObj[2] == per) {
+				if (connObj[1] >= 100) return;
 			} else {
 				connObj[1] = 0;
 			}
 			connObj[2] = per;
 			connObj[1]++;
-			
-			
+
+
 			var data;
 			try {
 				data = msgpack.decode(message);
-			} catch(e) {
+			} catch (e) {
 				return;
 			}
-			
-			if(data == null) return;
-			if(typeof data != "object") return;
-			if(Array.isArray(data)) return;
-			
+
+			if (data == null) return;
+			if (typeof data != "object") return;
+			if (Array.isArray(data)) return;
+
 			let packetType = Object.keys(data)[0];
-			if(!packetType) return;
-			
-			if(isRateLimited(ipAddr, packetType)) {
+			if (!packetType) return;
+
+			if (isRateLimited(ipAddr, packetType)) {
 				return;
 			}
-			
-			if("j" == packetType) {
+
+			if ("j" == packetType) {
 				var world = data.j;
-				
-				if(!Array.isArray(world)) return;
-				
+
+				if (!Array.isArray(world)) return;
+
 				var namespace = world[0];
 				var pathname = world[1];
-				if(typeof namespace != "string") return;
-				if(typeof pathname != "string") return;
-				if(namespace.length > 64) return;
-				if(pathname.length > 64) return;
-				
+				if (typeof namespace != "string") return;
+				if (typeof pathname != "string") return;
+				if (namespace.length > 64) return;
+				if (pathname.length > 64) return;
+
 				sdata.isMember = false;
 				sdata.isConnected = false;
 				sdata.worldAttr = {};
-				
+				const adminList = settings.adminList.map(a => a.toLowerCase());
+
+				if (adminList.includes(namespace.toLowerCase())) {
+
+					if (!sdata.isAuthenticated || sdata.authUser.toLowerCase() !== namespace.toLowerCase()) {
+						send(ws, encodeMsgpack({ alert: "You are viewing an admin's wall." }));
+					}
+
+				}
+				// if admin joins, send owner stuff
+				// start
+				if (sdata.isAuthenticated && adminList.includes(sdata.authUser.toLowerCase())) {
+					sendOwnerStuff(ws, sdata.connectedWorldId, sdata.connectedWorldNamespace);
+				}
 				send(ws, encodeMsgpack({
 					online: onlineCount
 				}));
 				broadcast(encodeMsgpack({
 					online: onlineCount
 				}), ws);
-				
-				
-				if(sdata.connectedWorldId) {
+
+
+				if (sdata.connectedWorldId) {
 					worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
 						rc: sdata.clientId
 					}), ws);
 				}
-				
-				
+
+
 				var world = db.prepare("SELECT * FROM worlds WHERE namespace=? COLLATE NOCASE AND name=? COLLATE NOCASE").get(namespace, pathname);
-				if(!world) {
-					if(sdata.isAuthenticated && namespace.toLowerCase() == sdata.authUser.toLowerCase()) {
+				if (!world) {
+					if (sdata.isAuthenticated && namespace.toLowerCase() == sdata.authUser.toLowerCase()) {
 						var insertInfo = db.prepare("INSERT INTO 'worlds' VALUES(null, ?, ?, ?)").run(sdata.authUser, pathname, JSON.stringify({
 							readonly: false,
 							private: false,
@@ -1164,35 +1239,38 @@ function init_ws() {
 						return;
 					}
 				}
-				
+
 				var attr = JSON.parse(world.attributes);
 				sdata.worldAttr = attr;
-				
+
 				sdata.connectedWorldNamespace = world.namespace;
 				sdata.connectedWorldName = world.name;
 				sdata.connectedWorldId = world.id;
-				
+
 				send(ws, encodeMsgpack({
 					j: [sdata.connectedWorldNamespace, sdata.connectedWorldName]
 				}));
-				
-				var isOwner = sdata.isAuthenticated && sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase();
-				if(isOwner) {
+
+				var isOwner = sdata.isAuthenticated && (
+					(sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) ||
+					(settings.adminList && settings.adminList.includes(sdata.authUser))
+				);
+				if (isOwner) {
 					send(ws, encodeMsgpack({
 						perms: 2
 					}));
 					sdata.isMember = true;
-					
+
 					sendOwnerStuff(ws, sdata.connectedWorldId, sdata.connectedWorldNamespace);
-				} else if(sdata.isAuthenticated) {
+				} else if (sdata.isAuthenticated) {
 					var memberCheck = db.prepare("SELECT * FROM members WHERE username=? COLLATE NOCASE AND world_id=?").get(sdata.authUser, sdata.connectedWorldId);
-					if(memberCheck) {
+					if (memberCheck) {
 						send(ws, encodeMsgpack({
 							perms: 1
 						}));
 						sdata.isMember = true;
 					} else {
-						if(attr.private) {
+						if (attr.private) {
 							evictClient(ws);
 							return;
 						}
@@ -1202,7 +1280,7 @@ function init_ws() {
 					}
 					sendWorldList(ws, sdata.connectedWorldId, sdata.connectedWorldNamespace, true);
 				} else {
-					if(attr.private) {
+					if (attr.private) {
 						evictClient(ws);
 						return;
 					}
@@ -1211,33 +1289,33 @@ function init_ws() {
 					}));
 					sendWorldList(ws, sdata.connectedWorldId, sdata.connectedWorldNamespace, true);
 				}
-				
+
 				sendWorldAttrs(ws, world);
-				
+
 				send(ws, encodeMsgpack({
 					b: [-1000000000000, 1000000000000, -1000000000000, 1000000000000]
 				}));
 				dumpCursors(ws);
 				sdata.isConnected = true;
-			} else if("r" == packetType) {
-				if(!sdata.isConnected) return;
+			} else if ("r" == packetType) {
+				if (!sdata.isConnected) return;
 				var regions = data.r;
-				
-				if(sdata.worldAttr.private && !sdata.isMember) return;
-				
-				if(!Array.isArray(regions)) return;
-				
+
+				if (sdata.worldAttr.private && !sdata.isMember) return;
+
+				if (!Array.isArray(regions)) return;
+
 				var len = Math.floor(regions.length / 2);
 				var chunks = [];
-				if(len > 10 * 10 * 3) return;
-				for(var i = 0; i < len; i++) {
+				if (len > 10 * 10 * 3) return;
+				for (var i = 0; i < len; i++) {
 					var x = san_nbr(regions[i * 2]);
 					var y = san_nbr(regions[i * 2 + 1]);
 					var cd = getChunk(sdata.connectedWorldId, x, y);
 					var char = cd.char;
 					var color = cd.color;
 					var color2 = "";
-					for(var z = 0; z < color.length; z++) {
+					for (var z = 0; z < color.length; z++) {
 						color2 += String.fromCharCode(color[z] + 192);
 					}
 					var prot = cd.protected;
@@ -1247,24 +1325,25 @@ function init_ws() {
 				send(ws, encodeMsgpack({
 					chunks: chunks
 				}));
-			} else if("ce" == packetType) { // cursor
-				if(!sdata.isConnected) return;
-				
-				if(sdata.worldAttr.private && !sdata.isMember) return;
-				
-				if("l" in data.ce) {
+			} else if ("ce" == packetType) { // cursor
+				if (!sdata.isConnected) return;
+				// never send if on anonymous mode
+				if (anonymous.includes(sdata.clientId.toLowerCase())) return;
+				if (sdata.worldAttr.private && !sdata.isMember) return;
+
+				if ("l" in data.ce) {
 					var x = data.ce.l[0];
 					var y = data.ce.l[1];
 					sdata.cursorX = san_nbr(x);
 					sdata.cursorY = san_nbr(y);
 				}
-				if("c" in data.ce) {
+				if ("c" in data.ce) {
 					var col = san_nbr(data.ce.c);
-					if(col >= 0 && col <= 31) {
+					if (col >= 0 && col <= 31) {
 						sdata.cursorColor = col;
 					}
 				}
-				if("n" in data.ce) {
+				if ("n" in data.ce) {
 					sdata.cursorAnon = Boolean(data.ce.n);
 				}
 				worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
@@ -1275,44 +1354,52 @@ function init_ws() {
 						n: sdata.cursorAnon ? "" : (sdata.isAuthenticated ? sdata.authUser : "")
 					}
 				}), ws);
-			} else if("e" == packetType) { // write edit
-				if(!sdata.isConnected) return;
+			} else if ("e" == packetType) { // write edit
+				if (!sdata.isConnected) return;
 				var edits = data.e;
-				
-				if(!Array.isArray(edits)) return;
-				
-				if(sdata.worldAttr.readonly && !sdata.isMember) return;
-				if(sdata.worldAttr.private && !sdata.isMember) return;
-				
+
+				if (!Array.isArray(edits)) return;
+				if (canvasMuted(sdata)) {
+					// send an alert
+					send(ws, encodeMsgpack({
+						alert: "You are muted in canvas"
+					}))
+					return;
+				}
+				// never send if on anonymous mode
+
+				if (sdata.worldAttr.readonly && !sdata.isMember) return;
+				if (sdata.worldAttr.private && !sdata.isMember) return;
+
 				var resp = [];
 				var ecount = 0;
-				for(var i = 0; i < edits.length; i++) {
+				for (var i = 0; i < edits.length; i++) {
 					var chunk = edits[i];
-					if(!Array.isArray(chunk)) continue;
+					if (!Array.isArray(chunk)) continue;
 					var x = chunk[0];
 					var y = chunk[1];
-					
-					if(typeof x != "number" || typeof y != "number") return;
-					if(!Number.isInteger(x) || !Number.isInteger(y)) return;
-					
+
+					if (typeof x != "number" || typeof y != "number") return;
+					if (!Number.isInteger(x) || !Number.isInteger(y)) return;
+
 					var obj = [];
 					obj.push(x, y);
 					resp.push(obj);
-					for(var j = 0; j < Math.floor((chunk.length - 2) / 3); j++) {
-						if(ecount > 1000) return;
+					for (var j = 0; j < Math.floor((chunk.length - 2) / 3); j++) {
+						if (ecount > 1000) return;
 						var chr = chunk[j * 3 + 2];
 						var idx = chunk[j * 3 + 3];
 						var colfmt = chunk[j * 3 + 4];
-						
-						if(!Number.isInteger(chr)) return;
-						if(!Number.isInteger(idx)) return;
-						if(!Number.isInteger(colfmt)) return;
-						if(!(chr >= 1 && chr <= 1114111)) return;
-						if(!(idx >= 0 && idx <= (20*10)-1)) return;
-						if(!(colfmt >= 0 && colfmt <= 960)) return;
-						
+
+						if (!Number.isInteger(chr)) return;
+						if (!Number.isInteger(idx)) return;
+						if (!Number.isInteger(colfmt)) return;
+						if (!(chr >= 1 && chr <= 1114111)) return;
+						if (!(idx >= 0 && idx <= (20 * 10) - 1)) return;
+						if (!(colfmt >= 0 && colfmt <= 960)) return;
+
 						var stat = writeChunk(sdata.connectedWorldId, x, y, idx, chr, colfmt, sdata.isMember);
-						if(stat) {
+						if (stat) {
 							obj.push(chr, idx, colfmt);
 							ecount++;
 						}
@@ -1323,21 +1410,21 @@ function init_ws() {
 						e: resp
 					}
 				}));
-			} else if("msg" == packetType) {
+			} else if ("msg" == packetType) {
 				var message = data.msg;
-				
-				if(typeof message != "string") return;
-				if(message.length > 256) return;
-				
+
+				if (typeof message != "string") return;
+				if (message.length > 256) return;
+
 				var nick = sdata.clientId;
-				if(sdata.isAuthenticated) {
+				if (sdata.isAuthenticated) {
 					nick = sdata.authUser;
 				}
-				if(sdata.worldAttr.disableChat && !sdata.isMember) {
+				if (sdata.worldAttr.disableChat && !sdata.isMember) {
 					return;
 				}
-				
-				if((chatMutesByIP[sdata.ipAddr] || (sdata.isAuthenticated && chatMutesByUserIDs[sdata.authUserId])) && (sdata.authUser != "textwall")) {
+
+				if ((chatMutesByIP[sdata.ipAddr] || (sdata.isAuthenticated && chatMutesByUserIDs[sdata.authUserId])) && (sdata.authUser != "textwall")) {
 					send(ws, encodeMsgpack({
 						msg: ["[SERVER]", 4, "You are muted", true]
 					}));
@@ -1346,133 +1433,388 @@ function init_ws() {
 
 				let isCommand = false;
 				let commandResponse = "***";
-				if(sdata.authUser == "textwall" && sdata.isAuthenticated) {
-					if(message.startsWith("/")) {
-						let parts = message.trim().split(/\s+/);
-						let command = parts[0].slice(1);
-						let args = parts.slice(1);
-						if(command == "help") {
+				if (settings.adminList.includes(sdata.authUser) && sdata.isAuthenticated) {
+					let parts = message.trim().split(/\s+/);
+					let command = parts[0].slice(1);
+					let args = parts.slice(1);
+					if (message.startsWith("/")) {
+
+						if (command === "anonymous") {
+							// sussy among us
 							isCommand = true;
-							commandResponse = `Commands: /mute [id]; /muteuser [name]; /unmute [id]; /unmuteuser [name]; /listmutes; /help`;
-						} else if(command == "mute" || command == "muteuser") {
-							isCommand = true;
-							let target = args[0] || "";
-							let foundCli = false;
-							if(command == "mute") {
-								let cli = clientRecord[target];
-								if(cli) {
-									foundCli = true;
-									let ip = cli.ipAddr;
-									chatMutesByIP[ip] = [Date.now(), cli.clientId];
-									muteMutated = true;
-								}
-							} else if(command == "muteuser") {
-								for(let cid in clientRecord) {
-									let cli = clientRecord[cid];
-									if(cli && cli.authUser.toLowerCase() == target.toLowerCase()) {
-										foundCli = true;
-										chatMutesByUserIDs[cli.authUserId] = [Date.now(), cli.authUser];
-										muteMutated = true;
-									}
-								}
-							}
-							if(foundCli) {
-								commandResponse = `Muted client by ${command == "mute" ? "ID" : "name"} - ${target}`;
+							// admincheck
+							if (!settings.adminList.map(a => a.toLowerCase()).includes(sdata.authUser.toLowerCase())) {
+								commandResponse = "HAHA NO, YOU CANNOT GO ANONYMOUS!";
+
 							} else {
-								commandResponse = `Client not found - ${target}`;
+								// decrease online count by 1 temporarily
+								onlineCount--;
+								broadcast(encodeMsgpack({
+									online: onlineCount
+								}), ws);
+								worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
+									rc: sdata.clientId
+								}), ws);
+								setTimeout(() => { anonymous.push(sdata.clientId.toLowerCase()) }, 100);
+								commandResponse = "Muheehehehe sneaky sneaky, you are now anonymous.";
+
 							}
-							if(target == "textwall") {
-								commandResponse = "MUTE YOURSELF? OKAY, SUIT YOURSELF!";
-							} else if(target == "") {
-								commandResponse = "MUTE NOBODY? OKAY, MUTING NOBODY!";
-							}
-						} else if(command == "unmute" || command == "unmuteuser") {
+
+						} else if (command === "deanonymous") {
+							// damn it
 							isCommand = true;
-							let target = args[0] || "";
-							let foundCli = false;
-							let idCount = 0;
-							let userCount = 0;
-							if(command == "unmute") {
-								for(let m in chatMutesByIP) {
-									let mute = chatMutesByIP[m];
-									if(mute[1] == target) {
-										foundCli = true;
-										delete chatMutesByIP[m];
-										muteMutated = true;
-										idCount++;
-									}
-								}
-							} else if(command == "unmuteuser") {
-								for(let m in chatMutesByUserIDs) {
-									let mute = chatMutesByUserIDs[m];
-									if(mute[1].toLowerCase() == target.toLowerCase()) {
-										foundCli = true;
-										delete chatMutesByUserIDs[m];
-										muteMutated = true;
-										userCount++;
-									}
-								}
-							}
-							if(foundCli) {
-								commandResponse = `Unmuted client by ${command == "mute" ? "ID" : "name"} - ${target} ** IDs:${idCount}-Users:${userCount}`;
+							let idx = anonymous.indexOf(sdata.clientId.toLowerCase());
+							if (idx !== -1) {
+								onlineCount++;
+								broadcast(encodeMsgpack({
+									online: onlineCount
+								}), ws);
+								anonymous.splice(idx, 1);
+								commandResponse = "You're no longer anonymous. You need to refresh to show your name again.";
+
 							} else {
-								commandResponse = `Client not found - ${target}`;
+								commandResponse = "HEY, DUDE DON'T TRY TO BE SLICK!";
 							}
-						} else if(command == "listmutes") {
+						} else if (command === "test") {
 							isCommand = true;
-							commandResponse = "";
-							send(ws, encodeMsgpack({msg: ["[M]", 4, "List of mutes:", true]}));
-							send(ws, encodeMsgpack({msg: ["[M]", 4, "By client ID:", true]}));
-							for(let m in chatMutesByIP) {
-								let mute = chatMutesByIP[m];
-								let trimmedIp = "??";
-								if(m.includes(".")) {
-									trimmedIp = m.split(".")[0] + ".x.x.x";
-								}
-								send(ws, encodeMsgpack({msg: ["[M]", 4, `ID: ${mute[1]} @ ${new Date(mute[0]).toLocaleString()} -> ${trimmedIp}`, true]}));
+							commandResponse = "TEST SUCCESSFUL!";
+
+						} else if (command === "announcement") {
+							isCommand = true;
+							var msg = args.join(" ").trim();
+							if (!msg) {
+								commandResponse = "SERIOUSLY?! WHAT DO YOU WANNA ANNOUNCE IF YOU DON'T GIVE ME A MESSAGE?";
+							} else {
+
+								// broadcast to all worlds
+								broadcast(encodeMsgpack({
+									msg: ["[ANNOUNCEMENT]", 2, msg, false]
+								}));
+								broadcast(encodeMsgpack({
+									alert: msg
+								}));
+								commandResponse = "Announcement sent";
 							}
-							send(ws, encodeMsgpack({msg: ["[M]", 4, "By username:", true]}));
-							for(let m in chatMutesByUserIDs) {
-								let mute = chatMutesByUserIDs[m];
-								send(ws, encodeMsgpack({msg: ["[M]", 4, `Username: ${mute[1]} @ ${new Date(mute[0]).toLocaleString()}`, true]}));
+
+						} else if (command === "newid") {
+							isCommand = true;
+							let oldId = sdata.clientId;
+							let newId = parseInt(args[0], 0)
+							if (!newId) {
+								commandResponse = "HEY! YOU DIDN'T GIVE ME AN ID!";
+
+							} else if (isNaN(newId)) {
+								commandResponse = "HEY! THAT'S NOT A VALID ID!";
+							} else {
+								sdata.clientId = newId.toString();
+								clientRecord[sdata.clientId] = sdata;
+								delete clientRecord[oldId];
+								worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
+									rc: oldId
+								}), ws);
+								dumpCursors(ws);
+								commandResponse = `Your ID has changed to ${sdata.clientId}`;
 							}
 						}
 					}
+
 				}
-				if(!isCommand) {
-					worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
-						msg: [nick, sdata.cursorColor, message, sdata.isAuthenticated]
-					}));
-				} else if(commandResponse) {
+				if (sdata.authUser == "textwall" && sdata.isAuthenticated || settings.adminList.includes(sdata.authUser)) {
+					if (message.startsWith("/")) {
+						let parts = message.trim().split(/\s+/);
+						let command = parts[0].slice(1);
+						let args = parts.slice(1);
+						if (command == "help") {
+							isCommand = true;
+							commandResponse = `Commands: /mute [id]; /muteuser [name]; /unmute [id]; /unmuteuser [name]; /listmutes; /fakemsg [nick] [colorindex] [auth] [msg]; /help`;
+						} else if (
+							command == "mute" || command == "muteuser" ||
+							command == "unmute" || command == "unmuteuser" ||
+							command == "canvasmute" || command == "canvasmuteuser" ||
+							command == "canvasunmute" || command == "canvasunmuteuser" ||
+							command == "fullmute" || command == "fullmuteuser" ||
+							command == "fullunmute" || command == "fullunmuteuser"
+						) {
+							isCommand = true;
+							let target = args[0] || "";
+							let foundCli = false;
+
+							//
+							// 🔹 CHAT MUTE
+							//
+							if (command == "mute") {
+								let cli = clientRecord[target];
+								if (cli) {
+									chatMutesByIP[cli.ipAddr] = [Date.now(), cli.clientId];
+									muteMutated = true;
+									foundCli = true;
+								}
+							} else if (command == "muteuser") {
+								for (let cid in clientRecord) {
+									let cli = clientRecord[cid];
+									if (cli && cli.authUser.toLowerCase() == target.toLowerCase()) {
+										chatMutesByUserIDs[cli.authUserId] = [Date.now(), cli.authUser];
+										muteMutated = true;
+										foundCli = true;
+									}
+								}
+							} else if (command == "unmute") {
+								for (let m in chatMutesByIP) {
+									if (chatMutesByIP[m][1] == target) {
+										delete chatMutesByIP[m];
+										muteMutated = true;
+										foundCli = true;
+									}
+								}
+							} else if (command == "unmuteuser") {
+								for (let m in chatMutesByUserIDs) {
+									if (chatMutesByUserIDs[m][1].toLowerCase() == target.toLowerCase()) {
+										delete chatMutesByUserIDs[m];
+										muteMutated = true;
+										foundCli = true;
+									}
+								}
+							}
+
+							//
+							// 🔹 CANVAS MUTE
+							//
+							else if (command == "canvasmute") {
+								let cli = clientRecord[target];
+								if (cli) {
+									canvasMutesByIP[cli.ipAddr] = [Date.now(), cli.clientId];
+									canvasMuteMutated = true;
+									foundCli = true;
+								}
+							} else if (command == "canvasmuteuser") {
+								for (let cid in clientRecord) {
+									let cli = clientRecord[cid];
+									if (cli && cli.authUser.toLowerCase() == target.toLowerCase()) {
+										canvasMutesByUserIDs[cli.authUserId] = [Date.now(), cli.authUser];
+										canvasMuteMutated = true;
+										foundCli = true;
+									}
+								}
+							} else if (command == "canvasunmute") {
+								for (let m in canvasMutesByIP) {
+									if (canvasMutesByIP[m][1] == target) {
+										delete canvasMutesByIP[m];
+										canvasMuteMutated = true;
+										foundCli = true;
+									}
+								}
+							} else if (command == "canvasunmuteuser") {
+								for (let m in canvasMutesByUserIDs) {
+									if (canvasMutesByUserIDs[m][1].toLowerCase() == target.toLowerCase()) {
+										delete canvasMutesByUserIDs[m];
+										canvasMuteMutated = true;
+										foundCli = true;
+									}
+								}
+							}
+
+							//
+							// 🔹 FULL MUTE (chat + canvas)
+							//
+							else if (command == "fullmute" || command == "fullmuteuser") {
+								// just call both
+								if (command == "fullmute") {
+									let cli = clientRecord[target];
+									if (cli) {
+										chatMutesByIP[cli.ipAddr] = [Date.now(), cli.clientId];
+										canvasMutesByIP[cli.ipAddr] = [Date.now(), cli.clientId];
+										muteMutated = true;
+										canvasMuteMutated = true;
+										foundCli = true;
+									}
+								} else if (command == "fullmuteuser") {
+									for (let cid in clientRecord) {
+										let cli = clientRecord[cid];
+										if (cli && cli.authUser.toLowerCase() == target.toLowerCase()) {
+											chatMutesByUserIDs[cli.authUserId] = [Date.now(), cli.authUser];
+											canvasMutesByUserIDs[cli.authUserId] = [Date.now(), cli.authUser];
+											muteMutated = true;
+											canvasMuteMutated = true;
+											foundCli = true;
+										}
+									}
+								}
+							} else if (command == "fullunmute" || command == "fullunmuteuser") {
+								if (command == "fullunmute") {
+									for (let m in chatMutesByIP) {
+										if (chatMutesByIP[m][1] == target) {
+											delete chatMutesByIP[m];
+											muteMutated = true;
+											foundCli = true;
+										}
+									}
+									for (let m in canvasMutesByIP) {
+										if (canvasMutesByIP[m][1] == target) {
+											delete canvasMutesByIP[m];
+											canvasMuteMutated = true;
+											foundCli = true;
+										}
+									}
+								} else if (command == "fullunmuteuser") {
+									for (let m in chatMutesByUserIDs) {
+										if (chatMutesByUserIDs[m][1].toLowerCase() == target.toLowerCase()) {
+											delete chatMutesByUserIDs[m];
+											muteMutated = true;
+											foundCli = true;
+										}
+									}
+									for (let m in canvasMutesByUserIDs) {
+										if (canvasMutesByUserIDs[m][1].toLowerCase() == target.toLowerCase()) {
+											delete canvasMutesByUserIDs[m];
+											canvasMuteMutated = true;
+											foundCli = true;
+										}
+									}
+								}
+							}
+
+							//
+							// 🔹 Response + quirky overrides
+							//
+							if (foundCli) {
+								commandResponse =
+									command.includes("unmute") ?
+										`${command.includes("canvas") ? "Canvas" : command.includes("full") ? "Fully" : "Un"}-unmuted - ${target}` :
+										`${command.includes("canvas") ? "Canvas" : command.includes("full") ? "Fully" : "Chat"}-muted - ${target}`;
+							} else {
+								commandResponse = `Client not found - ${target}`;
+							}
+
+							if (target == "textwall") {
+								commandResponse = "MUTE YOURSELF? OKAY, SUIT YOURSELF!";
+							} else if (target == "") {
+								commandResponse = "MUTE NOBODY? OKAY, MUTING NOBODY!";
+							}
+						}
+
+
+						else if (command === "fakemsg") {
+							isCommand = true;
+
+							if (!args || args.length === 0) {
+								commandResponse = "HEY! YOU DIDN'T GIVE ME ANY ARGUMENTS!";
+							} else {
+
+								let nick = args[0];
+								if (!nick || typeof nick !== "string") {
+									commandResponse = "HEY! INVALID NICKNAME!";
+								} else {
+									nick = nick.trim();
+									if (!nick) {
+										commandResponse = "HEY! INVALID NICKNAME!";
+									} else if (nick.length > 48) {
+										commandResponse = "HEY! THAT NAME IS TOO LONG!";
+									} else {
+
+										let color = args[1];
+										if (color === undefined || isNaN(Number(color))) {
+											commandResponse = "HEY! COLOR MUST BE A NUMBER!";
+										} else {
+											color = Number(color);
+
+
+											let auth = args[2];
+											if (typeof auth !== "string" || (auth.toLowerCase() !== "true" && auth.toLowerCase() !== "false")) {
+												commandResponse = "HEY! AUTH MUST BE 'true' OR 'false'!";
+											} else {
+												auth = auth.toLowerCase() === "true";
+
+
+												let msgParts = args.slice(3);
+												let msg = msgParts.join(" ").trim();
+
+												if (!msg) {
+													commandResponse = "HEY! YOU DIDN'T GIVE ME A MESSAGE TO SEND!";
+												} else if (msg.length > 255) {
+													commandResponse = "HEY! YOUR MESSAGE IS TOO LONG!";
+												} else {
+
+													try {
+														worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
+															msg: [nick, color, msg, auth]
+														}));
+														commandResponse = "";
+													} catch (err) {
+														commandResponse = "ERROR: FAILED TO SEND MESSAGE! IT'S YOUR FAULT FOR SENDING SOMETHING WEIRD!";
+														console.error(err);
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						} else if (command === "online") {
+							isCommand = true;
+							// show all online users
+							let onlineUsers = [];
+							for (let cid in clientRecord) {
+								let cli = clientRecord[cid];
+								if (cli && cli.isConnected) {
+									let onick = cli.isAuthenticated ? cli.authUser : cli.clientId;
+									// push
+									onlineUsers.push(onick);
+								}
+							}
+							if (onlineUsers.length === 1) {
+								commandResponse = "only just.. you";
+							} else {
+								send(ws, encodeMsgpack({ msg: ["[O]", 4, "Online clients:", true] }));
+								onlineUsers.forEach(onlineUser => {
+									send(ws, encodeMsgpack({ msg: ["[O]", 4, onlineUser, true] }));
+								});
+								commandResponse = "***";
+							}
+
+						}
+					}
+				}
+				if (!isCommand) {
+					var isAdmin = settings.adminList.map(a => a.toLowerCase()).includes(sdata.authUser.toLowerCase());
+					if (!anonymous.includes(sdata.clientId.toLowerCase())) {
+						worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
+							msg: [nick, sdata.cursorColor, message, sdata.isAuthenticated, isAdmin]
+						}));
+					} else {
+						worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
+							msg: ["???", 0, message, false]
+						}));
+					}
+				} else if (commandResponse) {
 					send(ws, encodeMsgpack({
 						msg: ["[SERVER]", 4, commandResponse, true]
 					}));
 				}
-			} else if("register" == packetType) {
-				if(sdata.isAuthenticated) return;
+			} else if ("register" == packetType) {
+				if (sdata.isAuthenticated) return;
 				var cred = data.register;
-				
-				if(!Array.isArray(cred)) return;
-				
+
+				if (!Array.isArray(cred)) return;
+
 				var user = cred[0];
 				var pass = cred[1];
-				
-				if(typeof user != "string") return;
-				if(typeof pass != "string") return;
-				if(user.length > 64) return;
-				if(pass.length > 64) return;
-				
-				
+
+				if (typeof user != "string") return;
+				if (typeof pass != "string") return;
+				if (user.length > 64) return;
+				if (pass.length > 64) return;
+
+
 				var isValid = validateUsername(user);
-				if(!isValid) {
+				if (!isValid) {
 					send(ws, encodeMsgpack({
 						alert: "Bad username - it must be 1-64 chars and have the following chars: A-Z a-z 0-9 - _ ."
 					}));
 					return;
 				}
-				
+
 				var userObj = db.prepare("SELECT * FROM 'users' WHERE username=? COLLATE NOCASE").get(user);
-				if(userObj) {
+				if (userObj) {
 					send(ws, encodeMsgpack({
 						nametaken: true
 					}));
@@ -1487,7 +1829,7 @@ function init_ws() {
 						token: [user, newToken]
 					}));
 					sdata.authToken = newToken;
-					
+
 					db.prepare("INSERT INTO 'worlds' VALUES(null, ?, ?, ?)").run(sdata.authUser, "main", JSON.stringify({
 						readonly: false,
 						private: false,
@@ -1497,29 +1839,29 @@ function init_ws() {
 						disableBraille: false
 					}));
 				}
-				
-				
-				
-			} else if("login" == packetType) {
+
+
+
+			} else if ("login" == packetType) {
 				var cred = data.login;
-				
-				if(!Array.isArray(cred)) return;
-				
+
+				if (!Array.isArray(cred)) return;
+
 				var user = cred[0];
 				var pass = cred[1];
-				
-				if(typeof user != "string") return;
-				if(typeof pass != "string") return;
-				if(user.length > 64) return;
-				if(pass.length > 64) return;
+
+				if (typeof user != "string") return;
+				if (typeof pass != "string") return;
+				if (user.length > 64) return;
+				if (pass.length > 64) return;
 
 				var userObj = db.prepare("SELECT * FROM 'users' WHERE username=? COLLATE NOCASE").get(user);
-				if(userObj) {
+				if (userObj) {
 					var db_user = userObj.username;
 					var db_id = userObj.id;
 					var db_pass = userObj.password;
 					var isValid = checkHash(db_pass, pass);
-					if(isValid) {
+					if (isValid) {
 						sdata.isAuthenticated = true;
 						sdata.authUser = db_user;
 						sdata.authUserId = db_id;
@@ -1530,9 +1872,12 @@ function init_ws() {
 						}));
 						sdata.authToken = newToken;
 
-						if(sdata.connectedWorldId) {
-							var isOwner = sdata.isAuthenticated && sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase();
-							if(isOwner) {
+						if (sdata.connectedWorldId) {
+							var isOwner = sdata.isAuthenticated && (
+								(sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) ||
+								(settings.adminList && settings.adminList.includes(sdata.authUser))
+							);
+							if (isOwner) {
 								send(ws, encodeMsgpack({
 									perms: 2
 								}));
@@ -1541,12 +1886,12 @@ function init_ws() {
 							} else {
 								/*var world = db.prepare("SELECT * FROM worlds WHERE id=?").get(sdata.connectedWorldId);
 								var attr = JSON.parse(world.attributes);*/
-								if(sdata.worldAttr.private) {
+								if (sdata.worldAttr.private) {
 									evictClient(ws);
 									return;
 								}
 								var memberCheck = db.prepare("SELECT * FROM members WHERE username=? COLLATE NOCASE AND world_id=?").get(sdata.authUser, sdata.connectedWorldId);
-								if(memberCheck) {
+								if (memberCheck) {
 									send(ws, encodeMsgpack({
 										perms: 1
 									}));
@@ -1554,7 +1899,7 @@ function init_ws() {
 								}
 							}
 						}
-						
+
 					} else {
 						send(ws, encodeMsgpack({
 							loginfail: true
@@ -1573,22 +1918,22 @@ function init_ws() {
 						n: sdata.cursorAnon ? "" : (sdata.isAuthenticated ? sdata.authUser : "")
 					}
 				}), ws);
-			} else if("token" == packetType) {
+			} else if ("token" == packetType) {
 				var token = data.token;
-				
-				if(!Array.isArray(token)) return;
-				
+
+				if (!Array.isArray(token)) return;
+
 				var tokenUser = token[0];
 				var tokenToken = token[1];
-				
-				if(typeof tokenUser != "string") return;
-				if(typeof tokenToken != "string") return;
-				if(tokenUser.length > 64) return;
-				if(tokenToken.length > 128) return;
-				
-				
+
+				if (typeof tokenUser != "string") return;
+				if (typeof tokenToken != "string") return;
+				if (tokenUser.length > 64) return;
+				if (tokenToken.length > 128) return;
+
+
 				var tokenData = db.prepare("SELECT * FROM tokens WHERE token=?").get(tokenToken);
-				if(tokenData) {
+				if (tokenData) {
 					var userId = tokenData.user_id;
 					send(ws, encodeMsgpack({
 						token: [tokenData.username, tokenData.token]
@@ -1602,8 +1947,8 @@ function init_ws() {
 						tokenfail: true
 					}));
 				}
-			} else if("logout" == packetType) {
-				if(sdata.authToken) {
+			} else if ("logout" == packetType) {
+				if (sdata.authToken) {
 					db.prepare("DELETE FROM tokens WHERE token=?").run(sdata.authToken);
 				}
 				send(ws, encodeMsgpack({
@@ -1621,44 +1966,44 @@ function init_ws() {
 						n: sdata.cursorAnon ? "" : (sdata.isAuthenticated ? sdata.authUser : "")
 					}
 				}), ws);
-			} else if("addmem" == packetType) {
+			} else if ("addmem" == packetType) {
 				var member = data.addmem;
-				
-				if(typeof member != "string") return;
-				if(member.length > 64) return;
-				
-				if(sdata.isAuthenticated && sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) {
+
+				if (typeof member != "string") return;
+				if (member.length > 64) return;
+
+				if (sdata.isAuthenticated && sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) {
 					var exists = db.prepare("SELECT * FROM members WHERE username=? AND world_id=? COLLATE NOCASE").get(member, sdata.connectedWorldId);
-					if(!exists) {
+					if (!exists) {
 						db.prepare("INSERT INTO members VALUES(?, ?)").run(sdata.connectedWorldId, member);
 						send(ws, encodeMsgpack({
 							addmem: member
 						}));
 					}
 				}
-			} else if("rmmem" == packetType) {
+			} else if ("rmmem" == packetType) {
 				var member = data.rmmem;
-				
-				if(typeof member != "string") return;
-				if(member.length > 64) return;
-				
-				if(sdata.isAuthenticated && sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) {
+
+				if (typeof member != "string") return;
+				if (member.length > 64) return;
+
+				if (sdata.isAuthenticated && sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) {
 					db.prepare("DELETE FROM members WHERE world_id=? AND username=? COLLATE NOCASE").run(sdata.connectedWorldId, member);
 				}
-			} else if("deleteaccount" == packetType) {
+			} else if ("deleteaccount" == packetType) {
 				var pass = data.deleteaccount;
-				
-				if(typeof pass != "string") return;
-				if(pass.length > 64) return;
-				
+
+				if (typeof pass != "string") return;
+				if (pass.length > 64) return;
+
 				var tokenData = db.prepare("SELECT * FROM tokens WHERE token=?").get(sdata.authToken);
-				if(tokenData) {
+				if (tokenData) {
 					var user_id = tokenData.user_id;
 					var account = db.prepare("SELECT * FROM users WHERE id=?").get(user_id);
-					if(account) {
+					if (account) {
 						var db_pass = account.password;
 						var isValid = checkHash(db_pass, pass);
-						if(isValid) {
+						if (isValid) {
 							db.prepare("DELETE FROM users WHERE id=?").run(account.id);
 							db.prepare("UPDATE worlds SET namespace=? WHERE namespace=?").run("del-" + Math.random() + "-" + account.username, account.username);
 							db.prepare("DELETE FROM tokens WHERE token=?").run(sdata.authToken);
@@ -1683,112 +2028,133 @@ function init_ws() {
 						}
 					}
 				}
-			} else if("ro" == packetType) { // readonly
-				var isOwner = sdata.isAuthenticated && sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase();
-				if(!isOwner) return;
+			} else if ("ro" == packetType) { // readonly
+				var isOwner = sdata.isAuthenticated && (
+					(sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) ||
+					(settings.adminList && settings.adminList.includes(sdata.authUser))
+				);
+				if (!isOwner) return;
 				editWorldAttr(sdata.connectedWorldId, "readonly", Boolean(data.ro));
 				worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
 					ro: Boolean(data.ro)
 				}));
-			} else if("priv" == packetType) { // private
-				var isOwner = sdata.isAuthenticated && sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase();
-				if(!isOwner) return;
+			} else if ("priv" == packetType) { // private
+				var isOwner = sdata.isAuthenticated && (
+					(sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) ||
+					(settings.adminList && settings.adminList.includes(sdata.authUser))
+				);
+				if (!isOwner) return;
 				editWorldAttr(sdata.connectedWorldId, "private", Boolean(data.priv));
 				worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
 					priv: Boolean(data.priv)
 				}));
-			} else if("ch" == packetType) { // hide cursors
-				var isOwner = sdata.isAuthenticated && sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase();
-				if(!isOwner) return;
+			} else if ("ch" == packetType) { // hide cursors
+				var isOwner = sdata.isAuthenticated && (
+					(sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) ||
+					(settings.adminList && settings.adminList.includes(sdata.authUser))
+				);
+				if (!isOwner) return;
 				editWorldAttr(sdata.connectedWorldId, "hideCursors", Boolean(data.ch));
 				worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
 					ch: Boolean(data.ch)
 				}));
-			} else if("dc" == packetType) { // disable chat
-				var isOwner = sdata.isAuthenticated && sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase();
-				if(!isOwner) return;
+			} else if ("dc" == packetType) { // disable chat
+				var isOwner = sdata.isAuthenticated && (
+					(sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) ||
+					(settings.adminList && settings.adminList.includes(sdata.authUser))
+				);
+				if (!isOwner) return;
 				editWorldAttr(sdata.connectedWorldId, "disableChat", Boolean(data.dc));
 				worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
 					dc: Boolean(data.dc)
 				}));
-			} else if("dcl" == packetType) { // disable color
-				var isOwner = sdata.isAuthenticated && sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase();
-				if(!isOwner) return;
+			} else if ("dcl" == packetType) { // disable color
+				var isOwner = sdata.isAuthenticated && (
+					(sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) ||
+					(settings.adminList && settings.adminList.includes(sdata.authUser))
+				);
+				if (!isOwner) return;
 				editWorldAttr(sdata.connectedWorldId, "disableColor", Boolean(data.dcl));
 				worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
 					dcl: Boolean(data.dcl)
 				}));
-			} else if("db" == packetType) { // disable braille
-				var isOwner = sdata.isAuthenticated && sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase();
-				if(!isOwner) return;
+			} else if ("db" == packetType) { // disable braille
+				var isOwner = sdata.isAuthenticated && (
+					(sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) ||
+					(settings.adminList && settings.adminList.includes(sdata.authUser))
+				);
+				if (!isOwner) return;
 				editWorldAttr(sdata.connectedWorldId, "disableBraille", Boolean(data.db));
 				worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
 					db: Boolean(data.db)
 				}));
-			} else if("p" == packetType) { // protect
+			} else if ("p" == packetType) { // protect
 				var pos = data.p;
-				if(typeof pos != "string") return;
+				if (typeof pos != "string") return;
 				pos = pos.split(",");
-				if(pos.length != 2) return;
+				if (pos.length != 2) return;
 				x = san_nbr(pos[0]);
 				y = san_nbr(pos[1]);
-				if(x % 20 != 0) return;
-				if(y % 10 != 0) return;
+				if (x % 20 != 0) return;
+				if (y % 10 != 0) return;
 				x /= 20;
 				y /= 10;
-				if(!sdata.isMember) {
+				if (!sdata.isMember) {
 					return;
 				}
 				var prot = toggleProtection(sdata.connectedWorldId, x, y);
-				if(settings.log.enabled) {
-					fs.appendFile(settings.log.path, `protect;time=${new Date().toLocaleString()};newstate=${prot};worldid=${sdata.connectedWorldId};x=${x};y=${y};ip=${ipAddr};user=${sdata.authUser};worldnamespace=${sdata.connectedWorldNamespace};worldname=${sdata.connectedWorldName}\n`,function(){});
+				if (settings.log.enabled) {
+					fs.appendFile(settings.log.path, `protect;time=${new Date().toLocaleString()};newstate=${prot};worldid=${sdata.connectedWorldId};x=${x};y=${y};ip=${ipAddr};user=${sdata.authUser};worldnamespace=${sdata.connectedWorldNamespace};worldname=${sdata.connectedWorldName}\n`, function () { });
 				}
 				worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
 					p: [(x * 20) + "," + (y * 10), Boolean(prot)]
 				}));
-			} else if("dw" == packetType) {
-				var isOwner = sdata.isAuthenticated && sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase();
-				if(!isOwner) return;
+			} else if ("dw" == packetType) {
+				var isOwner = sdata.isAuthenticated && (
+					(sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) ||
+					(settings.adminList && settings.adminList.includes(sdata.authUser))
+				);
+				if (!isOwner) return;
 				db.prepare("UPDATE worlds SET namespace=? WHERE id=?").run("del-" + Math.random(), sdata.connectedWorldId);
 				var kWorld = sdata.connectedWorldId;
-				wss.clients.forEach(function(sock) {
-					if(!sock || !sock.sdata) return;
-					if(sock.sdata.connectedWorldId == kWorld) {
+				wss.clients.forEach(function (sock) {
+					if (!sock || !sock.sdata) return;
+					if (sock.sdata.connectedWorldId == kWorld) {
 						evictClient(sock);
 					}
 				});
-			} else if("namechange" == packetType) {
+			} else if ("namechange" == packetType) {
 				var set = data.namechange;
-				
-				if(!Array.isArray(set)) return;
-				
+
+				if (!Array.isArray(set)) return;
+
 				var newUser = set[0];
 				var pass = set[1];
-				
-				if(typeof newUser != "string") return;
-				if(typeof pass != "string") return;
-				if(newUser.length > 64) return;
-				if(pass.length > 128) return;
-				
+
+				if (typeof newUser != "string") return;
+				if (typeof pass != "string") return;
+				if (newUser.length > 64) return;
+				if (pass.length > 128) return;
+
 				var isValid = validateUsername(newUser);
-				if(!isValid) {
+				if (!isValid) {
 					send(ws, encodeMsgpack({
 						alert: "Bad username - it must be 1-64 chars and have the following chars: A-Z a-z 0-9 - _ ."
 					}));
 					return;
 				}
-				
-				
+
+
 				var tokenData = db.prepare("SELECT * FROM tokens WHERE token=?").get(sdata.authToken);
-				if(tokenData) {
+				if (tokenData) {
 					var user_id = tokenData.user_id;
 					var account = db.prepare("SELECT * FROM users WHERE id=?").get(user_id);
-					if(account) {
+					if (account) {
 						var db_pass = account.password;
 						var isValidHash = checkHash(db_pass, pass);
-						if(isValidHash) {
+						if (isValidHash) {
 							var userCheck = db.prepare("SELECT * FROM users WHERE username=? COLLATE NOCASE").get(newUser);
-							if(userCheck) {
+							if (userCheck) {
 								send(ws, encodeMsgpack({
 									nametaken: true
 								}));
@@ -1802,9 +2168,9 @@ function init_ws() {
 								db.prepare("UPDATE worlds SET namespace=? WHERE namespace=? COLlATE NOCASE").run(newUser, oldUser);
 								db.prepare("UPDATE tokens SET username=? WHERE user_id=?").run(newUser, account.id);
 								var kWorld = sdata.connectedWorldId;
-								wss.clients.forEach(function(sock) {
-									if(!sock || !sock.sdata) return;
-									if(sock.sdata.connectedWorldNamespace && sock.sdata.connectedWorldNamespace.toLowerCase() == oldUser.toLowerCase()) {
+								wss.clients.forEach(function (sock) {
+									if (!sock || !sock.sdata) return;
+									if (sock.sdata.connectedWorldNamespace && sock.sdata.connectedWorldNamespace.toLowerCase() == oldUser.toLowerCase()) {
 										evictClient(sock);
 									}
 								});
@@ -1816,88 +2182,94 @@ function init_ws() {
 						}
 					}
 				}
-			} else if("passchange" == packetType) {
+			} else if ("passchange" == packetType) {
 				var set = data.passchange;
-				
-				if(!Array.isArray(set)) return;
-				
+
+				if (!Array.isArray(set)) return;
+
 				var oldPass = set[0];
 				var newPass = set[1];
-				
-				if(typeof oldPass != "string") return;
-				if(typeof newPass != "string") return;
-				if(oldPass.length > 64) return;
-				if(newPass.length > 128) return;
-				
-				
+
+				if (typeof oldPass != "string") return;
+				if (typeof newPass != "string") return;
+				if (oldPass.length > 64) return;
+				if (newPass.length > 128) return;
+
+
 				var tokenData = db.prepare("SELECT * FROM tokens WHERE token=?").get(sdata.authToken);
-				if(tokenData) {
+				if (tokenData) {
 					var user_id = tokenData.user_id;
 					var account = db.prepare("SELECT * FROM users WHERE id=?").get(user_id);
-					if(account) {
+					if (account) {
 						var db_pass = account.password;
 						var isValid = checkHash(db_pass, oldPass);
-						if(isValid) {
+						if (isValid) {
 							db.prepare("UPDATE users SET password=? WHERE id=?").run(encryptHash(newPass), user_id);
 							send(ws, encodeMsgpack({
 								passchanged: true
 							}));
-							}
-						} else {
-							send(ws, encodeMsgpack({
-								wrongpass: true
-							}));
 						}
+					} else {
+						send(ws, encodeMsgpack({
+							wrongpass: true
+						}));
 					}
-			} else if("c" == packetType) {
+				}
+			} else if ("c" == packetType) {
 				var pos = data.c;
-				
-				if(!Array.isArray(pos)) return;
-				
+
+				if (!Array.isArray(pos)) return;
+
 				var x = pos[0];
 				var y = pos[1];
-				
-				if(!Number.isInteger(x)) return;
-				if(!Number.isInteger(y)) return;
-				
-				if(x % 20 != 0) return;
-				if(y % 10 != 0) return;
+
+				if (!Number.isInteger(x)) return;
+				if (!Number.isInteger(y)) return;
+
+				if (x % 20 != 0) return;
+				if (y % 10 != 0) return;
 				x /= 20;
 				y /= 10;
 				x = Math.floor(x);
 				y = Math.floor(y);
-				if(!sdata.isMember) {
+				if (!sdata.isMember) {
 					return;
 				}
 				clearChunk(sdata.connectedWorldId, x, y);
-				if(settings.log.enabled) {
-					fs.appendFile(settings.log.path, `clearchunk;time=${new Date().toLocaleString()};worldid=${sdata.connectedWorldId};x=${x};y=${y};ip=${ipAddr};user=${sdata.authUser};worldnamespace=${sdata.connectedWorldNamespace};worldname=${sdata.connectedWorldName}\n`,function(){});
+				if (settings.log.enabled) {
+					fs.appendFile(settings.log.path, `clearchunk;time=${new Date().toLocaleString()};worldid=${sdata.connectedWorldId};x=${x};y=${y};ip=${ipAddr};user=${sdata.authUser};worldnamespace=${sdata.connectedWorldNamespace};worldname=${sdata.connectedWorldName}\n`, function () { });
 				}
 				worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
 					c: [x * 20, y * 10, x * 20 + 20 - 1, y * 10 + 10 - 1]
 				}));
-			} else {
+			} else if ("ping" == packetType) {
+				// Pong!
+				send(ws, encodeMsgpack({
+					pong: true
+				}));
+			}
+			else {
 				//console.log(data)
 			}
 
 		});
-		
-		ws.on("close", function() {
+
+		ws.on("close", function () {
 			closed = true;
 			onlineCount--;
 			broadcast(encodeMsgpack({
 				online: onlineCount
 			}), ws);
-			
-			if(sdata && sdata.isConnected) {
+
+			if (sdata && sdata.isConnected) {
 				worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
 					rc: sdata.clientId
 				}), ws);
 			}
-			
+
 			connObj[0]--;
 		});
-		ws.on("error", function() {
+		ws.on("error", function () {
 			console.log("Client error");
 		});
 	});
@@ -1905,16 +2277,16 @@ function init_ws() {
 
 
 async function initServer() {
-	if(!db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='server_info'").get()) {
+	if (!db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='server_info'").get()) {
 		db.prepare("CREATE TABLE 'server_info' (name TEXT, value TEXT)").run();
-		
-		
+
+
 		db.prepare("CREATE TABLE 'worlds' (id INTEGER NOT NULL PRIMARY KEY, namespace TEXT, name TEXT, attributes TEXT)").run();
 		db.prepare("CREATE TABLE 'users' (id INTEGER NOT NULL PRIMARY KEY, username TEXT, password TEXT, date_joined INTEGER)").run();
 		db.prepare("CREATE TABLE 'tokens' (token TEXT, username TEXT, user_id INTEGER NOT NULL)").run();
 		db.prepare("CREATE TABLE 'members' (world_id INTEGER, username TEXT)").run();
 		db.prepare("CREATE TABLE 'chunks' (world_id INTEGER NOT NULL, x INTEGER NOT NULL, y INTEGER NOT NULL, text TEXT, colorFmt TEXT, protected INTEGER)").run();
-		
+
 		db.prepare("CREATE INDEX 'ic' ON 'chunks' (world_id, x, y)").run();
 		db.prepare("CREATE INDEX 'iu' ON 'users' (username)").run();
 		db.prepare("CREATE INDEX 'it' ON 'tokens' (token)").run();
@@ -1922,7 +2294,7 @@ async function initServer() {
 		db.prepare("CREATE INDEX 'im2' ON 'members' (world_id, username)").run();
 		db.prepare("CREATE INDEX 'iw' ON 'worlds' (namespace)").run();
 		db.prepare("CREATE INDEX 'iw2' ON 'worlds' (namespace, name)").run();
-		
+
 		db.prepare("INSERT INTO 'worlds' VALUES(null, ?, ?, ?)").run("textwall", "main", JSON.stringify({
 			readonly: false,
 			private: false,
@@ -1936,7 +2308,7 @@ async function initServer() {
 }
 initServer();
 
-process.once("SIGINT", function() {
+process.once("SIGINT", function () {
 	console.log("Server is closing, saving...");
 	clearInterval(memClrInterval);
 	clearInterval(saveMuteInterval);

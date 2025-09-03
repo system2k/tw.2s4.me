@@ -362,13 +362,13 @@ th,td{
     height:300px;
     transition:all .5s;
     pointer-events:none;
-    transform:translateX(220px)
+    transform:translateX(320px)
 }
 #chat.open{
     transform:translateX(0px)
 }
 .chatcontainer{
-    width:200px;
+    width:300px;
     background-color:rgba(30,30,30,.8);
     border-radius:0 0 0 5px;
     padding:10px;
@@ -388,7 +388,22 @@ th,td{
     height:100%;
     font-size:13px;
     word-wrap:break-word;
-    overflow:auto
+    overflow:auto;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+.fade-in {
+    opacity: 0;
+    transform: translateY(5px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-in.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+#chatbox.dark {
+    background-color: #000;
+    color: #fff;
 }
 #chatbox>p{
     margin:5px
@@ -642,3 +657,16 @@ ul::-webkit-scrollbar-thumb{
     background-color:rgba(255,255,255,.2);
     border-radius:5px
 }
+
+#ping {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.7);
+    color: #0f0;
+    padding: 5px 10px;
+    font-family: monospace;
+    font-size: 14px;
+    border-radius: 5px;
+    z-index: 9999;
+  }
