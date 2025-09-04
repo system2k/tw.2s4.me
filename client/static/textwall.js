@@ -8,7 +8,7 @@
     }
     var n = t;
     function r() {
-        var e = ["copyico", "cool", "/static/star.svg", "preventDefault", "newpass", "texttheme", "pointerId", "checked", "dec", "size", "now", "themeico", "dblclick", "round", "flex", "readOnly", "removeChild", "floor", "fromCodePoint", "dataset", "offset", "deleteaccount", "showothercurs", "div", "customtheme", "#493AC1", "memberlist", "member", "inputType", "2055914epKCPp", "#7EED56", "px ", "open", "quadraticCurveTo", "appendChild", "Create", "focus", ", monospace", "random", "register", "setItem", "#000000", "paste", "fetchFont", "zoom", "&y=", "includes", "block", "strikethrough", "password", "New passwords do not match.", "opacity", "0,-10", "\\p{Extended_Pictographic}", "Unifont", "registerbtn", "hideCursors", "msg", "inputmember", "private", "dark blue", "selectionEnd", "startsWith", "loginbtn", "execCommand", "noui", "10px Special", "pointercancel", "Please type a password.", "/static/fonts/terminus.hex", "disableChat", "rgba(0,120,212,0.5)", "Please type 'confirm' in the text box if you would like to delete your wall.", "pop", "log", "italic bold 10px ", "insertBefore", "href", "true", "toLowerCase", "length", "#6D482F", "accountdeleted", "clientHeight", "font", "col", "change", "none", "7382lhphtT", "refresh", "target", "string", "writeText", "OffscreenCanvas", "touchend", "addmemberbtn", "rgba(221,249,255,0.5)", "#EBEBEB", "binaryType", "translateX(0px)", "get", "/static/lock_open.svg", "cursor", "themetext", "backgroundColor", "textarea", "Firefox", "fillRect", "lastedit", "maxLength", "innerWidth", "walllist", "Username/Password is incorrect.", "newpass2", "loginfail", "#898D90", "clientY", "innerText", "text", "#FFB470", " nearby", "number", "accountsettings", "deleteContentBackward", "connecting2", "left", "codePointAt", "perms", "oldpass", "top", "display", "contains", "Password has been changed.", "You cannot add more than 20 members.", "teal", "substring", "Please type your username.", "transform", "getMonth", "#6A5CFF", "translate", "toString", "/static/moon.svg", "onchange", "shift", ", monospace, Special", "span", "shownametags", "328500xgTFKE", "tpwordgo", "fillText", "end", "highlighted", "clipboardData", "getFloat64", "Invalid code point: ", "chatbox", "disablecolour", "Array.from requires an array-like object - not null or undefined", "pale purple", "password2", "createElement", "Array.from: when provided, the second argument must be a function", "bold", "/static/ping.js", "fillStyle", "18ZbIeJp", "#009EAA", "Inconsolata", "wheel", "padStart", "addmem", "byteOffset", "100%", "selected", "insertLineBreak", "translateX(-105%)", "toUpperCase", "rainbow", "disabled", "setTransform", "pageX", "wrongpass", "submitpasschange", "disableColour", "optionsmenu", "decorations", "multiple", "add", "chat to nobody", "closemenu", "keys", "userAgent", "showchat", "dark grey", "src", "fill", "black", "primary", "call", "0.2", "nametaken", "main", "innerHeight", "drawText", "childElementCount", "chngusername", "remove", "getElementById", "light pink", "coords", "Array.prototype.indexOf called on null or undefined", "getContext", "disablebraille", "#B44AC0", "select", "sign", "deletepassword", "placeholder", "delete", "tpcoordgo", "ws://", "Create a new wall", "splice", "set", "spaceMissingCharacters", "yellow", "alert", "arraybuffer", "10px", "copy", "abc", "drawChar", "host", "-20,-10", "chunks", "charCodeAt", "freename", "#9C6926", "alt", "edge", "You have typed in your current username.", "isArray", "type 'confirm' here", "walldisablecolour", "rgba(204,204,204,0.5)", "underline", "option", "split", "#FFD635", "strokeStyle", "buttonlink", "popstate", "removeItem", "test", "Your username is now: ", "classList", "undefined", "min", "pointerup", "login", "maxy", "Terminus", "charMap", "orientationchange", "#811E9F", "onclick", "1024463WHQzZL", "function", "keydown", "dpr", "registerlink", "hidden", "copydecorations", "bold ", "Custom", "admin", "logoutlink", "data", "clientX", "deltaY", "onerror", "tpy", "orange", "txt", "Please type your new password.", "readonly", "msgcontainer", "protect", "3gLFWBy", "noreg", "scale", "scrollHeight", "520rMZDVP", "deletename", "/ws", "tagName", "parse", "submitnamechange", "protected", "sqrt", "Public", "This wall is in read-only mode.", "send", "indexOf", "parseFont", "magenta", "rawy", "/static/sun.svg", "subarray", "wss://", "input", "light teal", "/static/done.svg", "removeAttribute", "colour", "fontSize", "onclose", "clr", ": (", "offsetTop", "info", "addEventListener", "replace", "touches", "children", "unread", "#FFA800", "clear", "smoothcursors", "passchanged", "ctrlKey", "close", "max", "home", "#2450A4", "innerHTML", "green", "keyCode", "reload", "translateX(", "rawx", "imageSmoothingEnabled", "goto", " nearby)", "px Special", "Password is incorrect.", "OPEN", "openmenu", "Connected.", "italic", "/static/fonts/fixed.hex", "prototype", "[object Function]", "   ", "Connection lost.", "pathname", "red", "drawImage", "deletewallconfirm", "createTextNode", "light green", "false", "clientWidth", "start", "show", "light blue", "copycolour", "ceil", "priv", "#94B3FF", "content", "brown", "justifyContent", "loginname", "loggedin", "style", "dcl", "altKey", "3268832GOrAoJ", "substr", "resize", "getElementsByClassName", "pink", "parentNode", "object", "anonymous", "rgba(239, 255, 71, 0.5)", "#222222", "free", "bmp", "italic ", "#6D001A", "Username is invalid.", "shiftKey", "type", "admintable", "140cEWkKM", "img", "submit", "isTrusted", " online", "from", "~main", "maxx", " (disconnected)", "requestAnimationFrame", "username", "chatmsg", "touchstart", "delaccountform", "button", "rgba(34, 34, 34, 0.4)", "\n\n\n\n\n\n\n\n\n", "pushState", "Please type your new password again.", "title", "toasting", "#FF99AA", "invalidTypeReplacement", "tpword", "#FFFFFF", "#51E9F4", "#3690EA", "lastElementChild", "minx", "contextmenu", "insertFromPaste", "monospace", "token", "GET", "pointerdown", "pasteico", "color", "teleport", "height", "abs", "px Courier", "canvas", "customfontsize", "blur", "checkbox", "Please type a username.", "Invalid wall name", "online", "roundRect", "readText", "^[a-zA-Z0-9_-]{1,24}$", "tpx", "unshift", "crosshair", "clipboard", "usermenu", "dark purple", "readyState", "lineTo", "burgundy", "stringify", "theme", "forceSharpPixels", "fromCharCode", "christmas", "value", "blue", "smoothpanning", "pointermove", "defineProperty", "has", "measureText", "disableBraille", "nextSibling", "customfont", "addmembers", "pageY", "colourlist", "textAlign", "parentElement", "dark red", "fontselect", "Please type your password.", "miny", "1339710QIWWjh", "#DE107F", "iPod", "Click here to reconnect.", "http", "https:", "width", "loginpass", "click", "status", "beige", "slice", "connecting1", "setAttribute", "sort", "replaceState", "textwall", "italic 10px ", "chngeusrpass", "chat", "77886fpVOzR", "pow", "history", "push", "exportFont", "Copied link.", "ontouchstart", "getDate", "scrollTop", "enabled", "iPad", "secondary", "lavender", "empty", "moveTo", "beginPath", "apply", " ~ ", "then", "getItem", "deletewall", "/static/copy.svg", "#515252", "rgba(", "#141414"];
+        var e = ["copyico", "cool", "/static/star.svg", "preventDefault", "newpass", "texttheme", "pointerId", "checked", "dec", "size", "now", "themeico", "dblclick", "round", "flex", "readOnly", "removeChild", "floor", "fromCodePoint", "dataset", "offset", "deleteaccount", "showothercurs", "div", "customtheme", "#493AC1", "memberlist", "member", "inputType", "2055914epKCPp", "#7EED56", "px ", "open", "quadraticCurveTo", "appendChild", "Create", "focus", ", monospace", "random", "register", "setItem", "#000000", "paste", "fetchFont", "zoom", "&y=", "includes", "block", "strikethrough", "password", "New passwords do not match.", "opacity", "0,-10", "\\p{Extended_Pictographic}", "Unifont", "registerbtn", "hideCursors", "msg", "inputmember", "private", "dark blue", "selectionEnd", "startsWith", "loginbtn", "execCommand", "noui", "10px Special", "pointercancel", "Please type a password.", "/static/fonts/terminus.hex", "disableChat", "rgba(0,120,212,0.5)", "Please type 'confirm' in the text box if you would like to delete your wall.", "pop", "log", "italic bold 10px ", "insertBefore", "href", "true", "toLowerCase", "length", "#6D482F", "accountdeleted", "clientHeight", "font", "col", "change", "none", "7382lhphtT", "refresh", "target", "string", "writeText", "OffscreenCanvas", "touchend", "addmemberbtn", "rgba(221,249,255,0.5)", "#EBEBEB", "binaryType", "translateX(0px)", "get", "/static/lock_open.svg", "cursor", "themetext", "backgroundColor", "textarea", "Firefox", "fillRect", "lastedit", "maxLength", "innerWidth", "walllist", "Username/Password is incorrect.", "newpass2", "loginfail", "#898D90", "clientY", "innerText", "text", "#FFB470", " nearby", "number", "accountsettings", "deleteContentBackward", "connecting2", "left", "codePointAt", "perms", "oldpass", "top", "display", "contains", "Password has been changed.", "You cannot add more than 20 members.", "teal", "substring", "Please type your username.", "transform", "getMonth", "#6A5CFF", "translate", "toString", "/static/moon.svg", "onchange", "shift", ", monospace, Special", "span", "shownametags", "328500xgTFKE", "tpwordgo", "fillText", "end", "highlighted", "clipboardData", "getFloat64", "Invalid code point: ", "chatbox", "disablecolour", "Array.from requires an array-like object - not null or undefined", "pale purple", "password2", "createElement", "Array.from: when provided, the second argument must be a function", "bold", "/static/ping.js", "fillStyle", "18ZbIeJp", "#009EAA", "Inconsolata", "wheel", "padStart", "addmem", "byteOffset", "100%", "selected", "insertLineBreak", "translateX(-105%)", "toUpperCase", "rainbow", "disabled", "setTransform", "pageX", "wrongpass", "submitpasschange", "disableColour", "optionsmenu", "decorations", "bdtiple", "add", "chat to nobody", "closemenu", "keys", "userAgent", "showchat", "dark grey", "src", "fill", "black", "primary", "call", "0.2", "nametaken", "main", "innerHeight", "drawText", "childElementCount", "chngusername", "remove", "getElementById", "light pink", "coords", "Array.prototype.indexOf called on null or undefined", "getContext", "disablebraille", "#B44AC0", "select", "sign", "deletepassword", "placeholder", "delete", "tpcoordgo", "ws://", "Create a new wall", "splice", "set", "spaceMissingCharacters", "yellow", "alert", "arraybuffer", "10px", "copy", "abc", "drawChar", "host", "-20,-10", "chunks", "charCodeAt", "freename", "#9C6926", "alt", "edge", "You have typed in your current username.", "isArray", "type 'confirm' here", "walldisablecolour", "rgba(204,204,204,0.5)", "underline", "option", "split", "#FFD635", "strokeStyle", "buttonlink", "popstate", "removeItem", "test", "Your username is now: ", "classList", "undefined", "min", "pointerup", "login", "maxy", "Terminus", "charMap", "orientationchange", "#811E9F", "onclick", "1024463WHQzZL", "function", "keydown", "dpr", "registerlink", "hidden", "copydecorations", "bold ", "Custom", "admin", "logoutlink", "data", "clientX", "deltaY", "onerror", "tpy", "orange", "txt", "Please type your new password.", "readonly", "msgcontainer", "protect", "3gLFWBy", "noreg", "scale", "scrollHeight", "520rMZDVP", "deletename", "/ws", "tagName", "parse", "submitnamechange", "protected", "sqrt", "Public", "This wall is in read-only mode.", "send", "indexOf", "parseFont", "magenta", "rawy", "/static/sun.svg", "subarray", "wss://", "input", "light teal", "/static/done.svg", "removeAttribute", "colour", "fontSize", "onclose", "clr", ": (", "offsetTop", "info", "addEventListener", "replace", "touches", "children", "unread", "#FFA800", "clear", "smoothcursors", "passchanged", "ctrlKey", "close", "max", "home", "#2450A4", "innerHTML", "green", "keyCode", "reload", "translateX(", "rawx", "imageSmoothingEnabled", "goto", " nearby)", "px Special", "Password is incorrect.", "OPEN", "openmenu", "Connected.", "italic", "/static/fonts/fixed.hex", "prototype", "[object Function]", "   ", "Connection lost.", "pathname", "red", "drawImage", "deletewallconfirm", "createTextNode", "light green", "false", "clientWidth", "start", "show", "light blue", "copycolour", "ceil", "priv", "#94B3FF", "content", "brown", "justifyContent", "loginname", "loggedin", "style", "dcl", "altKey", "3268832GOrAoJ", "substr", "resize", "getElementsByClassName", "pink", "parentNode", "object", "anonymous", "rgba(239, 255, 71, 0.5)", "#222222", "free", "bmp", "italic ", "#6D001A", "Username is invalid.", "shiftKey", "type", "admintable", "140cEWkKM", "img", "submit", "isTrusted", " online", "from", "~main", "maxx", " (disconnected)", "requestAnimationFrame", "username", "chatmsg", "touchstart", "delaccountform", "button", "rgba(34, 34, 34, 0.4)", "\n\n\n\n\n\n\n\n\n", "pushState", "Please type your new password again.", "title", "toasting", "#FF99AA", "invalidTypeReplacement", "tpword", "#FFFFFF", "#51E9F4", "#3690EA", "lastElementChild", "minx", "contextmenu", "insertFromPaste", "monospace", "token", "GET", "pointerdown", "pasteico", "color", "teleport", "height", "abs", "px Courier", "canvas", "customfontsize", "blur", "checkbox", "Please type a username.", "Invalid wall name", "online", "roundRect", "readText", "^[a-zA-Z0-9_-]{1,24}$", "tpx", "unshift", "crosshair", "clipboard", "usermenu", "dark purple", "readyState", "lineTo", "burgundy", "stringify", "theme", "forceSharpPixels", "fromCharCode", "christmas", "value", "blue", "smoothpanning", "pointermove", "defineProperty", "has", "measureText", "disableBraille", "nextSibling", "customfont", "addmembers", "pageY", "colourlist", "textAlign", "parentElement", "dark red", "fontselect", "Please type your password.", "miny", "1339710QIWWjh", "#DE107F", "iPod", "Click here to reconnect.", "http", "https:", "width", "loginpass", "click", "status", "beige", "slice", "connecting1", "setAttribute", "sort", "replaceState", "textwall", "italic 10px ", "chngeusrpass", "chat", "77886fpVOzR", "pow", "history", "push", "exportFont", "Copied link.", "ontouchstart", "getDate", "scrollTop", "enabled", "iPad", "secondary", "lavender", "empty", "moveTo", "beginPath", "apply", " ~ ", "then", "getItem", "deletewall", "/static/copy.svg", "#515252", "rgba(", "#141414"];
         return (r = function () {
             return e
         }
@@ -344,14 +344,18 @@
                 darkChat: document.getElementById("darkChat"),
                 rainbowTag: document.getElementById("rainbowTag"),
                 fps: document.getElementById("fps"),
-                showFeedback: document.getElementById("showFeedback")
+                showFeedback: document.getElementById("showFeedback"),
+                anonIdShow: document.getElementById("anonIdShow")
             };
             tt.showothercurs[n(427)] = !0,
                 tt[n(567)][n(427)] = !0,
                 tt.showchat[n(427)] = !0,
                 tt[n(577)][n(427)] = !1,
                 tt[n(358)][n(427)] = !0,
-                tt[n(223)].checked = !0;
+                tt[n(223)].checked = !0,
+                tt["showFeedback"] = !0,
+                tt["anonIdShow"] = !0,
+                tt["rainbowTag"] = !0;
             const nt = {
                 protect: document[n(628)]("protect"),
                 clear: document.getElementById(n(222)),
@@ -1139,12 +1143,7 @@
                     }
                 }
                 )),
-                document[n(216)](n(689), (function (e) {
-                    var r = n;
-                    if (e.isTrusted)
-                        switch (e.keyCode) {
-                            case 90:
-                                e.ctrlKey && (function () {
+                undoWrite=function () {
                                     var e = t;
                                     if (0 != Be[e(500)]) {
                                         var n = Be[e(564)]();
@@ -1159,7 +1158,13 @@
                                             pe = r,
                                             le(a)
                                     }
-                                }(),
+                                },
+                document[n(216)](n(689), (function (e) {
+                    var r = n;
+                    if (e.isTrusted)
+                        switch (e.keyCode) {
+                            case 90:
+                                e.ctrlKey && (undoWrite(),
                                     e[r(423)]());
                                 break;
                             case 89:
@@ -1369,9 +1374,6 @@
                             localStorage[t(460)]("anonymous", r),
                                 Re = !0,
                                 ge = !0;
-                            break;
-                        case document.getElementById('anonIdShow'):
-                            ge = !0;
                             break;
                         case lt:
                             document[t(628)](t(680))[t(270)][t(550)] = t(507),
@@ -1704,14 +1706,25 @@
                 var t = n;
                 if (e[t(294)]) {
                     var r = document[t(628)](t(302));
+                    // /^[\s?]*$/ <- blocks question marks
+                    // fixed to
+                    // /^\s*$/
                     gn(),
-                        Xe + 300 > performance[t(430)]() || (/^[\s?]*$/[t(674)](r[t(356)]) ? r[t(356)] = "" : (a.send(Or({
+                        Xe + 300 > performance[t(430)]() || (/^\s*$/[t(674)](r[t(356)]) ? r[t(356)] = "" : (a.send(Or({
                             msg: r[t(356)][t(274)](0, 180)
                         })),
                             Xe = performance[t(430)](),
                             r.value = "",
                             r.focus()))
                 }
+            }
+            function aib(e) {
+                var t = n;
+                a.send(Or({
+                    msg: e
+                })),
+                    Xe = performance[t(430)]();
+
             }
             function xn() {
                 var e = n
@@ -1874,6 +1887,7 @@
             }
             let hue = 0;
             window.w = {};
+
             window.elem = tt;
             window.w.events = {};
             window.w.on = function (e, t) {
@@ -2105,17 +2119,17 @@
                             l: A.l
                         });
                         null != I.l &&
-                        (
-                            A.l = I.l,
-                            tt[t(223)][t(427)] ||
-                            (A[t(235)] = A.l[0], A[t(201)] = A.l[1])
-                        ),
-                        null != I.c &&
-                        (A.c = I.c),
-                        null != I.n &&
-                        (A.n = I.n),
-                        ge = !0,
-                        On();
+                            (
+                                A.l = I.l,
+                                tt[t(223)][t(427)] ||
+                                (A[t(235)] = A.l[0], A[t(201)] = A.l[1])
+                            ),
+                            null != I.c &&
+                            (A.c = I.c),
+                            null != I.n &&
+                            (A.n = I.n),
+                            ge = !0,
+                            On();
 
                         break;
                     case "pong":
@@ -2155,7 +2169,7 @@
 
                                 container.classList.add("adminTag");
                                 // sync them up
-                                
+
                                 container.addEventListener("animationstart", () => {
                                     var otherTag = document.querySelector(".adminTag");
                                     var anim = container.getAnimations();
@@ -2548,6 +2562,28 @@
                 , qn = performance[n(430)]()
                 , Yn = 0;
             const Jn = [4, 5, 7, 8, 9, 18, 11, 20, 13, 28, 15];
+            window.colFmt = function (idx = 0, opts = {}) {
+                let n = parseInt(idx, 10);
+                if (isNaN(n)) n = 0
+
+                // clamp
+                n = Math.max(0, Math.min(30, n));
+
+                const {
+                    bold = false,
+                    italic = false,
+                    underline = false,
+                    strikethrough = false
+                } = opts;
+                // build
+                let bd = 0
+                if (bold) bd += 31 * 8
+                if (italic) bd += 31 * 4
+                if (underline) bd += 31 * 2
+                if (strikethrough) bd += 31 * 1
+
+                return n + bd
+            }
             window.writeCharAt = writeCharAt;
             function writeCharAt(char, color, coordX, coordY, r, a) {
                 var Ce = { x: coordX, y: coordY };
@@ -2923,7 +2959,7 @@
             var uP = 200;
             var aB;
 
-            function bC() {
+            function setWriteInterval() {
                 if (aB) clearInterval(aB);
                 aB = setInterval(flushWrites, uP);
             }
@@ -2962,13 +2998,13 @@
                     }
                 }
             }
-
+            window.setWriteInterval = setWriteInterval;
             function setFlushInterval(newer) {
                 var int = parseInt(newer);
                 if (isNaN(int)) int = 200;
                 if (int < 0) int = 0;
                 uP = int;
-                bC(); // restart interval
+                setWriteInterval(); // restart interval
             }
 
             // always return the write buffer
@@ -3082,8 +3118,6 @@
             window.w.getTMapping = t;
             window.w.renderChunkAmount = renderChunkAmount;
             window.w.setRenderChunkAmount = function (e) { renderChunkAmount = parseInt(e, 0); ge = !0 };
-            window.w.renderChunks = bt;
-            window.w.toggleGrid = function () { tt.grid.checked = !tt.grid.checked; ge = true; };
             window.w.getTheme = function () { return { mode: N, primary: C, secondary: A, texttheme: P.checked }; };
             window.getChar = function (e, t, r = 0, a = 0) {
                 if (e === undefined || t === undefined || r === undefined || a === undefined) {
@@ -3210,7 +3244,7 @@
                 return XYtoTile(x, y);
             }
             window.getXYCoordsFromMouseCoords = Wn;
-            bC();
+            setWriteInterval();
             var wr = performance.now()
                 , Mr = 100
                 , kr = performance[n(430)]() + 1e3;
@@ -3433,46 +3467,6 @@
                     Ce.x = Hr.x,
                         Ce.y = Hr.y
                 }
-            // canvas grid for each 20,10
-            // 1px lines
-            function Am() {
-                var e = n;
-                // get context
-
-                E[e(600)](1, 0, 0, 1, 0, 0); // reset transform
-                E.clearRect(0, 0, E.width, E.height);
-
-                // Calculate the size of one character cell in pixels
-                // 10 is the character width, 20 is the character height
-                // at = zoom, v = devicePixelRatio * zoom
-                var charWidth = 10 * v;
-                var charHeight = 20 * v;
-
-                E.strokeStyle = xe ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
-                E.lineWidth = 1 * v;
-
-                // start drawing grid
-                E.beginPath();
-
-                // vertical lines (every 20 characters)
-                for (let x = 0; x <= E.canvas.width; x += 20 * charWidth / 10) {
-                    E.moveTo(x, 0);
-                    E.lineTo(x, E.canvas.height);
-                }
-
-                // horizontal lines (every 10 characters)
-                for (let y = 0; y <= E.canvas.height; y += 10 * charHeight / 20) {
-                    E.moveTo(0, y);
-                    E.lineTo(E.canvas.width, y);
-                }
-
-                E.stroke();
-            }
-            // debug
-            // wtf is k
-            window.E = E;
-            window.k = k;
-            window.Am = Am;
             function Kr() {
                 var e = n;
                 if (null == a || a[e(348)] != WebSocket.CONNECTING && a[e(348)] != WebSocket.OPEN) {
@@ -3738,7 +3732,7 @@
                     if (!e[a(500)])
                         throw new Error;
                     if (e instanceof Uint8Array || (e = new Uint8Array(e)),
-                        r && r.multiple)
+                        r && r.bdtiple)
                         for (o = []; i < e[a(500)];)
                             o[a(398)](c());
                     else
@@ -4126,6 +4120,115 @@
                         }
                     }
             }
-            ), 400)
+            ), 400);
+            function advancedSplit(str, noSurrog, noComb, norm) {
+                if (str && str.constructor == Array) return str.slice(0);
+                var chars = [];
+                var buffer = "";
+                var surrogMode = false;
+                var charMode = false;
+                var combCount = 0;
+                var combLimit = 15;
+                for (var i = 0; i < str.length; i++) {
+                    var char = str[i];
+                    var code = char.charCodeAt();
+                    if (code >= 0xDC00 && code <= 0xDFFF) {
+                        if (surrogMode) {
+                            buffer += char;
+                        } else {
+                            buffer = "";
+                            chars.push("?");
+                        }
+                        surrogMode = false;
+                        combCount = 0;
+                        continue;
+                    } else if (surrogMode) {
+                        buffer = "";
+                        chars.push("?");
+                        surrogMode = false;
+                        continue;
+                    }
+                    if (!noSurrog && code >= 0xD800 && code <= 0xDBFF) {
+                        if (charMode) {
+                            chars.push(buffer);
+                        }
+                        charMode = true;
+                        surrogMode = true;
+                        buffer = char;
+                        continue;
+                    }
+                    if (!norm && ((code >= 0x0300 && code <= 0x036F) ||
+                        (code >= 0x1DC0 && code <= 0x1DFF) ||
+                        (code >= 0x20D0 && code <= 0x20FF) ||
+                        (code >= 0xFE20 && code <= 0xFE2F))) {
+                        if (!noComb && charMode && combCount < combLimit) {
+                            buffer += char;
+                            combCount++;
+                        }
+                        continue;
+                    } else {
+                        if (charMode) {
+                            chars.push(buffer);
+                        }
+                        combCount = 0;
+                        charMode = true;
+                        buffer = char;
+                    }
+                }
+                if (buffer) {
+                    chars.push(buffer);
+                }
+                return chars;
+            }
+            window.w.typeChar = writeChar;
+            window.w.socket = {}
+            Object.defineProperty(window.w, "socket", {
+                get: function () { return a }
+            });
+            window.w.clipboard = {
+                textarea: null,
+                init: function () {
+                    var area = document.createElement("textarea");
+                    area.value = "";
+                    area.id = "textCopy";
+                    area.style.width = "1px";
+                    area.style.height = "1px";
+                    area.style.position = "absolute";
+                    area.style.left = "-1000px";
+                    area.style.top = "-1000px";
+                    document.body.appendChild(area);
+                    window.w.clipboard.textarea = area;
+                },
+                copy: function (string) {
+                    window.w.clipboard.textarea.value = string;
+                    window.w.clipboard.textarea.select();
+                    document.execCommand("copy");
+                    window.w.clipboard.textarea.value = "";
+                }
+            }
+            window.w.clipboard.init();
+            window.w.showChat = function (toggle) {
+                const chat = document.getElementById("chat");
+                if (!chat) return; // safety check
+
+                if (toggle === undefined) {
+
+                    chat.classList.toggle("open");
+                    return;
+                }
+
+                const shouldShow = toggle === true || toggle === 1 || toggle === "1" || toggle === "true" || toggle === "show";
+
+                if (shouldShow) {
+                    chat.classList.add("open");
+                } else {
+                    chat.classList.remove("open");
+                }
+            };
+            window.w.split = advancedSplit;
+            window.w.chat = {};
+            window.w.chat.send = aib;
+            window.cursor = Ce;
+            window.undoWrite = undoWrite;
         }(n(677) == typeof browser ? browser = {} : browser)
 }("undefined" == typeof browser ? browser = {} : browser);
