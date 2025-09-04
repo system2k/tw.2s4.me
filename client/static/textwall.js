@@ -3140,7 +3140,7 @@
             window.w.goto = vr;
             window.w.tp = Zn;
             window.w.cursors = Pe;
-            window.w.getTMapping = t;
+            window.getTMapping = t;
             window.w.renderChunkAmount = renderChunkAmount;
             window.w.setRenderChunkAmount = function (e) { renderChunkAmount = parseInt(e, 0); ge = !0 };
             window.w.getTheme = function () { return { mode: N, primary: C, secondary: A, texttheme: P.checked }; };
