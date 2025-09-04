@@ -4230,5 +4230,11 @@
             window.w.chat.send = aib;
             window.cursor = Ce;
             window.undoWrite = undoWrite;
+            window.network = {};
+            window.network.binary = Or;
+            window.network.send = function(data){
+                a.send(window.network.binary(data))
+            };
+            window.network.wsUrl = "wss://" + location.host + "/ws";
         }(n(677) == typeof browser ? browser = {} : browser)
 }("undefined" == typeof browser ? browser = {} : browser);
