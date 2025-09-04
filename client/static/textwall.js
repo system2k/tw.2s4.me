@@ -353,9 +353,9 @@
                 tt[n(577)][n(427)] = !1,
                 tt[n(358)][n(427)] = !0,
                 tt[n(223)].checked = !0,
-                tt["showFeedback"] = !0,
-                tt["anonIdShow"] = !0,
-                tt["rainbowTag"] = !0;
+                tt["showFeedback"].checked = !0,
+                tt["anonIdShow"].checked = !0,
+                tt["rainbowTag"].checked = !0;
             const nt = {
                 protect: document[n(628)]("protect"),
                 clear: document.getElementById(n(222)),
@@ -1143,22 +1143,22 @@
                     }
                 }
                 )),
-                undoWrite=function () {
-                                    var e = t;
-                                    if (0 != Be[e(500)]) {
-                                        var n = Be[e(564)]();
-                                        Ce.x = n[0],
-                                            Ce.y = n[1];
-                                        var r = pe
-                                            , a = ce()
-                                            , o = Zr(n[3]);
-                                        pe = o[0],
-                                            le(o[1]),
-                                            Vn(n[2], 0, !0) || Be.unshift(n),
-                                            pe = r,
-                                            le(a)
-                                    }
-                                },
+                undoWrite = function () {
+                    var e = t;
+                    if (0 != Be[e(500)]) {
+                        var n = Be[e(564)]();
+                        Ce.x = n[0],
+                            Ce.y = n[1];
+                        var r = pe
+                            , a = ce()
+                            , o = Zr(n[3]);
+                        pe = o[0],
+                            le(o[1]),
+                            Vn(n[2], 0, !0) || Be.unshift(n),
+                            pe = r,
+                            le(a)
+                    }
+                },
                 document[n(216)](n(689), (function (e) {
                     var r = n;
                     if (e.isTrusted)
@@ -2515,6 +2515,7 @@
                     localStorage[e(460)]("y", Ce.y)
             }
             function Kn(e, t, r, a) {
+
                 var o = n;
                 tt[o(577)].checked && (r = 0),
                     r = Zr(r)[0],
@@ -2864,6 +2865,12 @@
                 M[t(676)][t(627)]("open")
             }
             function mr(e) {
+                e = parseInt(e, 10);
+
+                if (isNaN(e) || !isFinite(e) || e < 0 || e > 30) {
+                    throw new TypeError("supported colors: 0 to 30")
+                }
+
                 var t = n;
                 (tt[t(577)][t(427)] || nt[t(604)][t(427)]) && (e = 0),
                     pe != e && (Oe = !0);
@@ -4232,9 +4239,19 @@
             window.undoWrite = undoWrite;
             window.network = {};
             window.network.binary = Or;
-            window.network.send = function(data){
+            window.network.send = function (data) {
                 a.send(window.network.binary(data))
             };
             window.network.wsUrl = "wss://" + location.host + "/ws";
+            window.w.changeZoom = function (e, t) {
+                console.warn("remember, this won't save!");
+                var r = n;
+                rt = e < 0 ? 0 : e > 10000 ? 10000 : e,
+                    at = Math.round(100 * rt) / 100,
+                    ot[r(356)] = 10 * at,
+                    t && ir(Math[r(433)](100 * at) + "% ", 1e3),
+                    kn()
+            }
+            window.w.changeColor = mr;
         }(n(677) == typeof browser ? browser = {} : browser)
 }("undefined" == typeof browser ? browser = {} : browser);

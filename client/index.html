@@ -431,11 +431,18 @@
 	</script>
 	<script>
 		const defaults = { darkMode: false, anonIdShow: true, rainbowTags: true, showFps: false, showFeedback: true };
+
 		for (const k in defaults) {
 			if (localStorage.getItem(k) === null) {
-				localStorage.setItem(k, JSON.stringify(defaults[k]));
-			};
+				localStorage.setItem(k, defaults[k]);
+			}
+
+			const element = document.getElementById(k);
+			if (element) {
+				element.checked = localStorage.getItem(k) === "true";
+			}
 		}
+
 	</script>
 	<script>
 		const anonId = document.getElementById("anonIdShow");
