@@ -774,9 +774,6 @@ td {
     font-family: cutive mono;
     src: url(fonts/CutiveMono-Regular.ttf)
 }
-/* ---------------------------
-   JetBrains Mono
---------------------------- */
 @font-face {
   font-family: 'JetBrains Mono';
   src: url('fonts/JetBrainsMono-Regular.ttf') format('truetype');
@@ -801,10 +798,6 @@ td {
   font-weight: 700;
   font-style: italic;
 }
-
-/* ---------------------------
-   Hack
---------------------------- */
 @font-face {
   font-family: 'Hack';
   src: url('fonts/Hack-Regular.ttf') format('truetype');
@@ -829,10 +822,6 @@ td {
   font-weight: 700;
   font-style: italic;
 }
-
-/* ---------------------------
-   Fira Code
---------------------------- */
 @font-face {
   font-family: 'Fira Code';
   src: url('fonts/FiraCode-Regular.ttf') format('truetype');
@@ -845,10 +834,6 @@ td {
   font-weight: 700;
   font-style: normal;
 }
-
-/* ---------------------------
-   Space Mono
---------------------------- */
 @font-face {
   font-family: 'Space Mono';
   src: url('fonts/SpaceMono-Regular.ttf') format('truetype');
@@ -873,10 +858,6 @@ td {
   font-weight: 700;
   font-style: italic;
 }
-
-/* ---------------------------
-   Anonymous Pro
---------------------------- */
 @font-face {
   font-family: 'Anonymous Pro';
   src: url('fonts/AnonymousPro-Regular.ttf') format('truetype');
@@ -901,10 +882,6 @@ td {
   font-weight: 700;
   font-style: italic;
 }
-
-/* ---------------------------
-   Source Code Pro
---------------------------- */
 @font-face {
   font-family: 'Source Code Pro';
   src: url('fonts/SourceCodePro-Regular.ttf') format('truetype');
@@ -929,10 +906,6 @@ td {
   font-weight: 700;
   font-style: italic;
 }
-
-/* ---------------------------
-   Iosevka
---------------------------- */
 @font-face {
   font-family: 'Iosevka';
   src: url('fonts/Iosevka-Regular.ttc') format('truetype');
@@ -945,10 +918,6 @@ td {
   font-weight: 700;
   font-style: normal;
 }
-
-/* ---------------------------
-   Cascadia Mono
---------------------------- */
 @font-face {
   font-family: 'Cascadia Mono';
   src: url('fonts/CascadiaMono-Regular.ttf') format('truetype');
