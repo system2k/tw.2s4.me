@@ -1953,6 +1953,36 @@
                     }
                 }
             }
+            function parseColoredMessage(msg) {
+                const regex = /<start\s+(#[0-9a-fA-F]{3,6})>([\s\S]*?)<end>/g;
+                const container = document.createElement("span");
+
+                let lastIndex = 0;
+                let match;
+
+                while ((match = regex.exec(msg)) !== null) {
+
+                    if (match.index > lastIndex) {
+                        container.appendChild(document.createTextNode(msg.slice(lastIndex, match.index)));
+                    }
+
+
+                    const colorSpan = document.createElement("span");
+                    colorSpan.style.color = match[1];
+                    colorSpan.textContent = match[2];
+                    container.appendChild(colorSpan);
+
+                    lastIndex = regex.lastIndex;
+                }
+
+
+                if (lastIndex < msg.length) {
+                    container.appendChild(document.createTextNode(msg.slice(lastIndex)));
+                }
+
+                return container;
+            }
+
             function Tn(e) {
                 var t = n
                     , r = new Uint8Array(e[t(698)]).buffer
@@ -2210,7 +2240,7 @@
                             c[o(454)](l);
 
 
-                            c.appendChild(document.createTextNode(o(412) + r));
+                            c.appendChild(parseColoredMessage(o(412) + r));
 
                             var u = Math[o(330)](i[o(712)] - i[o(403)] - i[o(503)]) < 2;
                             u && gn();
@@ -2228,7 +2258,8 @@
                                 nick: e,
                                 msg: r,
                                 color: n,
-                                isAdmin: isAdmin
+                                isAdmin: isAdmin,
+                                isRegistered: a
                             })
                         }(T[0], T[1], T[2], T[3], T[4] || false);
                         break;
@@ -2581,6 +2612,46 @@
                 , qn = performance[n(430)]()
                 , Yn = 0;
             const Jn = [4, 5, 7, 8, 9, 18, 11, 20, 13, 28, 15];
+            window.prsCol = function (title) {
+                var titles = [
+                    "black",
+                    "grey",
+                    "light grey",
+                    "light pink",
+                    "red",
+                    "orange",
+                    "brown",
+                    "yellow",
+                    "light green",
+                    "green",
+                    "light blue",
+                    "blue",
+                    "dark blue",
+                    "purple",
+                    "dark purple",
+                    "dark red",
+                    "dark green",
+                    "dark teal",
+                    "teal",
+                    "indigo",
+                    "periwinkle",
+                    "pink",
+                    "dark brown",
+                    "burgundy",
+                    "pale yellow",
+                    "light teal",
+                    "lavender",
+                    "pale purple",
+                    "magenta",
+                    "beige",
+                    "dark grey"
+                ];
+                function tmp(e, t) {
+                    const idx = e.indexOf(t)
+                    return idx === -1 ? 0 : idx;
+                }
+                return tmp(titles, title);
+            }
             window.colFmt = function (idx = 0, opts = {}) {
                 let n = parseInt(idx, 10);
                 if (isNaN(n)) n = 0
