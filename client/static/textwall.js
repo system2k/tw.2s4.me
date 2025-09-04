@@ -191,8 +191,26 @@
                     Pointfree: 16,
                     Monofur: 18,
                     "Fantasque Sans Mono": 18,
-                    Custom: 20
+                    "JetBrains Mono": 18,
+                    Hack: 18,
+                    "Fira Code": 18,
+                    "Space Mono": 18,
+                    "Anonymous Pro": 16,
+                    "Source Code Pro": 18,
+                    Iosevka: 18,
+                    "Cascadia Mono": 18,
+                    "Noto Sans Mono": 16,
+                    "PxPlus IBM VGA8": 16,
+                    Menlo: 16,
+                    Consolas: 16,
+                    "Andale Mono": 16,
+                    "Lucida Console": 16,
+                    Monaco: 16,
+                    "DM Mono": 16,
+                    "Quicksand Mono": 18,
+                    Custom: 20,
                 };
+
             var G = n(588)
                 , Q = Math.floor($[G] * v) + n(451) + G + ", monospace, Special";
             const _ = new Map;
