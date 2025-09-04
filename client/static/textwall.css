@@ -1056,14 +1056,14 @@ ul::-webkit-scrollbar-thumb {
 button,
 input[type="button"],
 input[type="submit"] {
-    padding: 6px 24px;
+    padding: 3px 20px;
     /* compact size */
     font-size: 14px;
     font-weight: 500;
     color: #aaa;
     background: #222;
     /* dark grey background */
-    border: none;
+    border: 3px solid #411 ;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.3s ease;
