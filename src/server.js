@@ -1363,7 +1363,7 @@ function init_ws() {
 				var edits = data.e;
 
 				if (!Array.isArray(edits)) return;
-				if (canvasMuted(sdata)) {
+				if (canvasMuted(sdata) && !settings.adminList.includes(sdata.authUser) && sdata.authUser !== "textwall") {
 					// send an alert
 					send(ws, encodeMsgpack({
 						alert: "You are muted in canvas"
@@ -1428,7 +1428,7 @@ function init_ws() {
 					return;
 				}
 
-				if ((chatMutesByIP[sdata.ipAddr] || (sdata.isAuthenticated && chatMutesByUserIDs[sdata.authUserId])) && (sdata.authUser != "textwall")) {
+				if ((chatMutesByIP[sdata.ipAddr] || (sdata.isAuthenticated && chatMutesByUserIDs[sdata.authUserId])) && (sdata.authUser != "textwall") && (!settings.adminList.includes(sdata.authUser))) {
 					send(ws, encodeMsgpack({
 						msg: ["[SERVER]", 4, "You are muted", true]
 					}));
