@@ -3,10 +3,12 @@
 	"useStatic": true,
 	"db": {
 		"path": "../data/data.sqlite3",
-		"chatMutePath": "./chat_mutes.json"
+		"chatMutePath": "./chat_mutes.json",
+		"canvasMutePath": "./canvas_mutes.json"
 	},
 	"log": {
 		"enabled": false,
 		"path": "./log.txt"
-	}
+	},
+	"adminList": []
 }
