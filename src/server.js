@@ -1584,9 +1584,9 @@ function init_ws() {
 						if (command == "help") {
 							isCommand = true;
 							if (!settings.adminList.includes(sdata.authUser)) {
-								commandResponse = `Commands: /mute [id]; /muteuser [name]; /unmute [id]; /unmuteuser [name]; /listmutes; /help; /online`;
+								commandResponse = `Commands: /mute [id]; /muteuser [name]; /unmute [id]; /unmuteuser [name]; /canvasmute [id]; /canvasmuteuser [name]; /canvasunmute [id]; /canvasunmuteuser [name]; /fullmute [id]; /fullmuteuser [name]; /fullunmute [id]; /fullunmuteuser [name]; /listmutes; /help; /online`;
 							} else {
-								commandResponse = `Commands: /mute [id]; /muteuser [name]; /unmute [id]; /unmuteuser [name]; /listmutes; /fakemsg [nick] [colorindex] [auth] [msg]; /help; /anonymous; /deanonymous; /announcement [message]; /newid [id]; /online`;
+								commandResponse = `Commands: /mute [id]; /muteuser [name]; /unmute [id]; /unmuteuser [name]; /canvasmute [id]; /canvasmuteuser [name]; /canvasunmute [id]; /canvasunmuteuser [name]; /fullmute [id]; /fullmuteuser [name]; /fullunmute [id]; /fullunmuteuser [name]; /listmutes; /fakemsg [nick] [colorindex] [auth] [msg]; /help; /anonymous; /deanonymous; /announcement [message]; /newid [id]; /online`;
 							}
 
 						} else if (
