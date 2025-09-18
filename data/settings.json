@@ -3,8 +3,8 @@
 	"useStatic": true,
 	"db": {
 		"path": "../data/data.sqlite3",
-		"chatMutePath": "./chat_mutes.json",
-		"canvasMutePath": "./canvas_mutes.json"
+		"chatMutePath": "../data/chat_mutes.json",
+		"canvasMutePath": "../data/canvas_mutes.json"
 	},
 	"log": {
 		"enabled": false,

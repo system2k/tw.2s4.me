@@ -1001,6 +1001,7 @@ function loadMutes() {
 	try {
 		fileMuteData = fs.readFileSync(muteDbPath);
 	} catch (e) {
+		console.error(e);
 		console.log("No mutes file found");
 		return; // no mutes...
 	}
@@ -1025,6 +1026,7 @@ function loadCanvasMutes() {
 		canvasMutesByIP = data.ip;
 		canvasMutesByUserIDs = data.id;
 	} catch (e) {
+		console.error(e);
 		console.log("No canvas mutes file found");
 		return; // no canvas mutes...
 	}
@@ -1752,36 +1754,75 @@ function init_ws() {
 							} else if (settings.adminList.includes(target)) {
 								commandResponse = "MUTE AN ADMIN? OKAY, SUIT YOURSELF!"
 							}
-						}
 
 
-						else if (command === "online") {
-							isCommand = true;
-							// show all online users
-							let onlineUsers = [];
-							for (let cid in clients) {
-								let cli = clients[cid].sdata;
-								if (cli && cli.isConnected) {
-									let onick = cli.isAuthenticated ? cli.authUser : cli.clientId;
-									let world = cli.connectedWorldNamespace
-									let worldName = cli.connectedWorldName
-									// push
-									onlineUsers.push({ n: onick, w: world, wn: worldName });
+							else if (command === "online") {
+								isCommand = true;
+								// show all online users
+								let onlineUsers = [];
+								for (let cid in clients) {
+									let cli = clients[cid].sdata;
+									if (cli && cli.isConnected) {
+										let onick = cli.isAuthenticated ? cli.authUser : cli.clientId;
+										let world = cli.connectedWorldNamespace
+										let worldName = cli.connectedWorldName
+										// push
+										onlineUsers.push({ n: onick, w: world, wn: worldName });
+									}
+								}
+								if (onlineUsers.length === 1) {
+									send(ws, encodeMsgpack({ msg: ["[O]", 10, "Online client:", true] }))
+									send(ws, encodeMsgpack({ msg: ["[O]", 10, (!settings.adminList.includes(sdata.authUser) ? onlineUsers[0].n : (onlineUsers[0].n + " ~" + onlineUsers[0].w + " (" + onlineUsers[0].wn + ")")), true] }));
+									commandResponse = "***";
+								} else {
+									send(ws, encodeMsgpack({ msg: ["[O]", 10, "Online clients:", true] }));
+									onlineUsers.forEach(onlineUser => {
+										send(ws, encodeMsgpack({ msg: ["[O]", 10, (!settings.adminList.includes(sdata.authUser) ? onlineUser.n : (onlineUser.n + " ~" + onlineUser.w + " (" + onlineUser.wn + ")")), true] }));
+									});
+									commandResponse = "***";
 								}
 							}
-							if (onlineUsers.length === 1) {
-								send(ws, encodeMsgpack({ msg: ["[O]", 10, "Online client:", true] }))
-								send(ws, encodeMsgpack({ msg: ["[O]", 10, (!settings.adminList.includes(sdata.authUser) ? onlineUsers[0].n : (onlineUsers[0].n + " ~" + onlineUsers[0].w + " (" + onlineUsers[0].wn + ")")), true] }));
-								commandResponse = "***";
-							} else {
-								send(ws, encodeMsgpack({ msg: ["[O]", 10, "Online clients:", true] }));
-								onlineUsers.forEach(onlineUser => {
-									send(ws, encodeMsgpack({ msg: ["[O]", 10, (!settings.adminList.includes(sdata.authUser) ? onlineUser.n : (onlineUser.n + " ~" + onlineUser.w + " (" + onlineUser.wn + ")")), true] }));
-								});
+						}
+							else if (command === "listmutes") {
+								isCommand = true;
+								
+								let chatMuteList = [];
+								for (let ip in chatMutesByIP) {
+									let masked = ip.replace(/^(\d+)\.\d+\.\d+\.\d+$/, "$1.XXX.XXX.XXX");
+									let entry = chatMutesByIP[ip];
+									chatMuteList.push(`IP: ${masked} (ID: ${entry[1]})`);
+								}
+								for (let uid in chatMutesByUserIDs) {
+									let entry = chatMutesByUserIDs[uid];
+									chatMuteList.push(`UserID: ${uid} (Name: ${entry[1]})`);
+								}
+								// List canvas mutes
+								let canvasMuteList = [];
+								for (let ip in canvasMutesByIP) {
+									let masked = ip.replace(/^(\d+)\.\d+\.\d+\.\d+$/, "$1.XXX.XXX.XXX");
+									let entry = canvasMutesByIP[ip];
+									canvasMuteList.push(`IP: ${masked} (ID: ${entry[1]})`);
+								}
+								for (let uid in canvasMutesByUserIDs) {
+									let entry = canvasMutesByUserIDs[uid];
+									canvasMuteList.push(`UserID: ${uid} (Name: ${entry[1]})`);
+								}
+								// compose
+								send(ws, encodeMsgpack({ msg: ["[M]", 10, "Chat mutes:", true] }));
+								if (chatMuteList.length === 0) {
+									send(ws, encodeMsgpack({ msg: ["[M]", 10, "(none)", true] }));
+								} else {
+									chatMuteList.forEach(m => send(ws, encodeMsgpack({ msg: ["[M]", 10, m, true] })));
+								}
+								send(ws, encodeMsgpack({ msg: ["[M]", 10, "Canvas mutes:", true] }));
+								if (canvasMuteList.length === 0) {
+									send(ws, encodeMsgpack({ msg: ["[M]", 10, "(none)", true] }));
+								} else {
+									canvasMuteList.forEach(m => send(ws, encodeMsgpack({ msg: ["[M]", 10, m, true] })));
+								}
 								commandResponse = "***";
 							}
-
-						}
+						
 					}
 				}
 				if (!isCommand) {
