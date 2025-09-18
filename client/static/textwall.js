@@ -1713,7 +1713,7 @@
             const hn = document[n(628)](n(394))
                 , yn = document[n(628)](n(220));
             function gn() {
-                return 2 == 3
+                chatbox.scrollTop = chatbox.scrollHeight
             }
 
 
@@ -2269,12 +2269,12 @@
                             c.appendChild(parseColoredMessage(o(412) + r));
 
                             var u = Math[o(330)](i[o(712)] - i[o(403)] - i[o(503)]) < 2;
-                            u && gn();
+                            
 
                             c.style.opacity = 0;
                             c.style.transition = "opacity 0.5s ease";
                             i.appendChild(c);
-
+                            u && gn();
                             void c.offsetWidth;
                             c.style.opacity = 1;
 
