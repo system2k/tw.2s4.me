@@ -333,7 +333,7 @@ td {
     text-align: center;
     transition: all .5s;
     border: 1px solid rgba(98, 1, 1, 0.8);
-    background-color: rgba(92, 0, 0, 0.349);
+    background-color: rgba(92, 0, 0, 0.949);
     color: #fff;
     margin: 15px;
     padding: 5px 15px 15px;
@@ -1095,7 +1095,13 @@ input[type="button"]:disabled {
     box-shadow: none;
     transform: none;
 }
-
+input[type="button"]:disabled {
+    background: #333;
+    color: #555;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
 input[type="checkbox"] {
     appearance: none;
     -webkit-appearance: none;
@@ -1142,6 +1148,22 @@ input[type="checkbox"]:focus-visible {
     /* ensures no default ring */
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
     /* optional subtle custom focus */
+}
+input[type="checkbox"]:disabled {
+    background: #ccc;
+    border-color: #888;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+input[type="checkbox"]:checked:disabled {
+    background: #d88;
+    border-color: #a88;
+}
+
+input[type="checkbox"]:disabled:hover {
+    background: #ccc;
+    border-color: #888;
 }
 
 input[type="range"] {

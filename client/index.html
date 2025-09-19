@@ -330,11 +330,6 @@
 			chatbox.style.color = darkMode ? '#fff' : '#000';
 			chatbox.querySelectorAll('*').forEach(applyMode);
 			chatbox.classList[rainbowTagsCheckbox.checked ? "add" : "remove"]("animatedTags");
-			autoscroll();
-		}
-
-		function autoscroll() {
-			chatbox.scrollTop = chatbox.scrollHeight;
 		}
 
 		checkbox.addEventListener('change', () => {
@@ -357,7 +352,6 @@
 						node.querySelectorAll('*').forEach(applyMode);
 						// Trigger fade-in
 						requestAnimationFrame(() => node.classList.add('show'));
-						autoscroll();
 					}
 				});
 			});

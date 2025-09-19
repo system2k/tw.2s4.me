@@ -1713,7 +1713,7 @@
             const hn = document[n(628)](n(394))
                 , yn = document[n(628)](n(220));
             function gn() {
-                return 2 == 3
+                chatbox.scrollTop = chatbox.scrollHeight
             }
 
 
@@ -1811,7 +1811,28 @@
                     e ? u.protected && St(l, !1) : u[t(408)] || St(l, !1)
                 }
             }
+            let pingInterval = null;
+            function startPing() {
+                if (pingInterval) return; // already running
+                pingInterval = setInterval(() => {
+                    NKe = performance.now();
+                    if (a.readyState === 1) {
+                        a.send(Or({ ping: true }));
+                    }
+                }, 1000);
+            }
+            function stopPing() {
+                if (pingInterval) {
+                    clearInterval(pingInterval);
+                    pingInterval = null;
+                }
+                lastPing = 0;
+                NKe = 0;
+            }
+
             function In() {
+                startPing()
+
                 var e = n;
                 document[e(628)]("connecting1")[e(537)] = e(243),
                     document[e(628)]("connecting2")[e(537)] = "",
@@ -1827,14 +1848,7 @@
                     2 == o[e(500)] && (r = o[1]),
                     Cn(t, r)
                 // always send { ping: true } to display ping messages
-                setInterval(() => {
-                    NKe = performance.now();
-                    // ensure it's sent at OPEN
 
-                    if (a.readyState === 1) {
-                        a && a.send(Or({ ping: true }));
-                    }
-                }, 1000);
             }
 
             function Cn(e, t) {
@@ -1857,6 +1871,8 @@
                     0))
             }
             function An() {
+                stopPing();
+                Acn(true);
                 var e = n;
                 En(),
                     m = !1,
@@ -1879,7 +1895,7 @@
                     document[e(628)](e(544))[e(537)] = e(378),
                     c.onclick = Kr
             }
-            function Acn() {
+            function Acn(isDisconnected = false) {
                 var lims = {
                     5: "#00ffff",
                     20: "#00ff00",
@@ -1894,9 +1910,15 @@
                     200: "#0000ff"
                 };
 
+                if (isDisconnected) {
+                    ping.innerText = "Disconnected";
+                    ping.style.color = "#888"; // gray for offline
+                    return;
+                }
+
                 ping.innerText = lastPing.toFixed(0) + " ms";
 
-                var color = "#ff00ff"; // default for over 200
+                var color = "#ff00ff"; // default for >200
                 for (var limit in lims) {
                     if (lastPing <= Number(limit)) {
                         color = lims[limit];
@@ -1906,6 +1928,7 @@
 
                 ping.style.color = color;
             }
+
             let hue = 0;
             window.w = {};
 
@@ -2246,12 +2269,12 @@
                             c.appendChild(parseColoredMessage(o(412) + r));
 
                             var u = Math[o(330)](i[o(712)] - i[o(403)] - i[o(503)]) < 2;
-                            u && gn();
+                            
 
                             c.style.opacity = 0;
                             c.style.transition = "opacity 0.5s ease";
                             i.appendChild(c);
-
+                            u && gn();
                             void c.offsetWidth;
                             c.style.opacity = 1;
 
