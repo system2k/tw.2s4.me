@@ -1516,6 +1516,9 @@ function init_ws() {
 									rc: oldId
 								}), ws);
 								dumpCursors(ws);
+								send(ws, encodeMsgpack({
+									id: sdata.clientId
+								}))
 								commandResponse = `Your ID has changed to ${sdata.clientId}`;
 							}
 						} else if (command === "fakemsg") {
