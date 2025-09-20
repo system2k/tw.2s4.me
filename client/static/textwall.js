@@ -3177,6 +3177,7 @@
                 }
             });
             window.cursors = Pe;
+            window.cursor = Ce;
             window.writeFlushRate = uP;
             window.flushWrites = flushWrites;
 
