@@ -1725,24 +1725,24 @@
             }
             function bn(e) {
                 var t = n;
-                if (e[t(294)]) {
-                    var r = document[t(628)](t(302));
-                    // /^[\s?]*$/ <- blocks question marks
-                    // fixed to
-                    // /^\s*$/
-                    gn(),
-                        Xe + 300 > performance[t(430)]() || (/^\s*$/[t(674)](r[t(356)]) ? r[t(356)] = "" : (a.send(Or({
-                            msg: r[t(356)][t(274)](0, 180)
-                        })),
-                            Xe = performance[t(430)](),
-                            r.value = "",
-                            r.focus()))
-                }
+                var r = document[t(628)](t(302));
+                // /^[\s?]*$/ <- blocks question marks
+                // fixed to
+                // /^\s*$/
+                gn(),
+                    Xe + 300 > performance[t(430)]() || (/^\s*$/[t(674)](r[t(356)]) ? r[t(356)] = "" : (window.w.chat.send(
+                        r.value.substr(0, 180)
+                    ),
+                        Xe = performance[t(430)](),
+                        r.value = "",
+                        r.focus()))
             }
             function aib(e) {
                 var t = n;
+                var data = { msg: e };
+                window.w.emit("chatBefore", data);
                 a.send(Or({
-                    msg: e
+                    msg: data.msg
                 })),
                     Xe = performance[t(430)]();
 
@@ -2700,6 +2700,17 @@
 
                 return n + bd
             }
+            window.prsFmt = function (chr) {
+                var col = chr % 31;
+                var format = Math.floor(chr / 31);
+                return {
+                    color: col,
+                    bold: (format & 8) == 8,
+                    italic: (format & 4) == 4,
+                    underline: (format & 2) == 2,
+                    strikethrough: (format & 1) == 1
+                };
+            }
             window.writeCharAt = writeCharAt;
             function writeCharAt(char, color, coordX, coordY, r, a) {
                 var Ce = { x: coordX, y: coordY };
@@ -2723,7 +2734,27 @@
                         0;
                 tt.rainbow[o(427)] && !r && (mr(Jn[Yn]),
                     ++Yn == Jn.length && (Yn = 0));
-                var d, f, v, h, y, g, p, b, x, w, M, k, E, S = 1, I = a ? 0 : ce(), C = Vr(color, I), A = Ce.x - c + 20 * (Ce.y - l), T = s[o(212)][A], B = Zr(T), F = B[0], P = B[1], L = s.txt[A];
+                var chr = prsFmt(color);
+                var data = {
+                    char: char,
+                    color: chr.color,
+                    x: Ce.x,
+                    y: Ce.y,
+                    bold: chr.bold,
+                    italic: chr.italic,
+                    underline: chr.underline,
+                    strikethrough: chr.strikethrough
+                };
+                window.w.emit("writeBefore", data);
+                var newColFmt = colFmt(data.color, data);
+                c = 20 * Math.floor(data.x / 20);
+                l = 10 * Math.floor(data.y / 10);
+                u = c + "," + l;
+                if (!we.has(u)) return 0;
+                var s = we.get(u);
+                Ce.x = data.x;
+                Ce.y = data.y;
+                var d, f, v, h, y, g, p, b, x, w, M, k, E, S = 1, I = newColFmt, C = newColFmt, A = Ce.x - c + 20 * (Ce.y - l), T = s[o(212)][A], B = Zr(T), F = B[0], P = B[1], L = s.txt[A];
                 return L == e && T == C || Qn(e, I) && Qn(L, P) || (M = P,
                     k = e,
                     E = I,
@@ -2768,18 +2799,36 @@
                         0;
                 tt.rainbow[o(427)] && !r && (mr(Jn[Yn]),
                     ++Yn == Jn.length && (Yn = 0));
-                var d, f, v, h, y, g, p, b, x, w, M, k, E, S = 1, I = a ? 0 : ce(), C = Vr(pe, I), A = Ce.x - c + 20 * (Ce.y - l), T = s[o(212)][A], B = Zr(T), F = B[0], P = B[1], L = s.txt[A];
+                var chr = prsFmt(Vr(pe, a ? 0 : ce()));
+                var data = {
+                    char: e,
+                    color: chr.color,
+                    x: Ce.x,
+                    y: Ce.y,
+                    bold: chr.bold,
+                    italic: chr.italic,
+                    underline: chr.underline,
+                    strikethrough: chr.strikethrough
+                };
+                window.w.emit("writeBefore", data);
+                var newColFmt = colFmt(data.color, data);
+                c = 20 * Math.floor(data.x / 20);
+                l = 10 * Math.floor(data.y / 10);
+                u = c + "," + l;
+                if (!we.has(u)) return 0;
+                var s = we.get(u);
+                var d, f, v, h, y, g, p, b, x, w, M, k, E, S = 1, I = Math.floor(newColFmt / 31), C = newColFmt, A = data.x - c + 20 * (data.y - l), T = s[o(212)][A], B = Zr(T), F = B[0], P = B[1], L = s.txt[A];
                 return L == e && T == C || Qn(e, I) && Qn(L, P) || (M = P,
                     k = e,
                     E = I,
-                    Gn(L) && Gn(k) && (2 & M) == (2 & E) && (1 & M) == (1 & E) && F == pe) || (r ? (g = Ce.x,
-                        p = Ce.y,
+                    Gn(L) && Gn(k) && (2 & M) == (2 & E) && (1 & M) == (1 & E) && F == pe) || (r ? (g = data.x,
+                        p = data.y,
                         b = s[o(704)][A],
                         x = T,
                         w = o,
                         Fe.unshift([g, p, b, x]),
-                        Fe[w(500)] > 1e3 && Fe[w(493)]()) : (d = Ce.x,
-                            f = Ce.y,
+                        Fe[w(500)] > 1e3 && Fe[w(493)]()) : (d = data.x,
+                            f = data.y,
                             v = s[o(704)][A],
                             h = T,
                             Be[(y = o)(343)]([d, f, v, h]),
@@ -2789,8 +2838,8 @@
                         Me.push([c / 20, l / 10, e.codePointAt(), A, C]),
                         S = 2,
                         It(u, Dt(A))),
-                    Ce[o(528)].x = Ce.x,
-                    Ce[o(528)].y = Ce.y,
+                    Ce[o(528)].x = data.x,
+                    Ce[o(528)].y = data.y,
                     Ce.x += t,
                     Hn(),
                     S
@@ -3111,10 +3160,6 @@
                                 }
                             }
                             tA[e(398)]([i, c, l, u, s]);
-                            if (tA[e(500)] === 4 && o + 1 < r[e(500)]) {
-                                for (d = o + 1; d < r[e(500)]; d++) Me[e(343)](r[d]);
-                                break;
-                            }
                         }
                         a.send(Or({ e: tA }));
                     }
@@ -3345,8 +3390,8 @@
             window.XYtoTile = function (x, y) {
                 const tileX = Math.floor(x / 20) * 20;
                 const tileY = Math.floor(y / 10) * 10;
-                const offsetX = x % 20;
-                const offsetY = y % 10;
+                const offsetX = x - Math.floor(x / 20) * 20;
+                const offsetY = y - Math.floor(y / 10) * 10;
                 return [tileX, tileY, offsetX, offsetY];
             }
             Object.defineProperty(window, "cursorCoords", {
@@ -4368,5 +4413,6 @@
                     kn()
             }
             window.w.changeColor = mr;
+            window.w.showToast = ir;
         }(n(677) == typeof browser ? browser = {} : browser)
 }("undefined" == typeof browser ? browser = {} : browser);
