@@ -2720,6 +2720,22 @@
                         zn = 0),
                     !char || zn >= 3)
                     return 0;
+                var chr = prsFmt(color);
+                var data = {
+                    char: char,
+                    color: chr.color,
+                    x: Ce.x,
+                    y: Ce.y,
+                    bold: chr.bold,
+                    italic: chr.italic,
+                    underline: chr.underline,
+                    strikethrough: chr.strikethrough
+                };
+                window.w.emit("writeBefore", data);
+                var newColFmt = colFmt(data.color, data);
+                Ce.x = data.x;
+                Ce.y = data.y;
+                char = data.char;
                 var i = (char = Array.from(char)[0])[o(546)]();
                 if (nt[o(363)][o(427)] && qr(i))
                     return 0;
@@ -2734,27 +2750,7 @@
                         0;
                 tt.rainbow[o(427)] && !r && (mr(Jn[Yn]),
                     ++Yn == Jn.length && (Yn = 0));
-                var chr = prsFmt(color);
-                var data = {
-                    char: char,
-                    color: chr.color,
-                    x: Ce.x,
-                    y: Ce.y,
-                    bold: chr.bold,
-                    italic: chr.italic,
-                    underline: chr.underline,
-                    strikethrough: chr.strikethrough
-                };
-                window.w.emit("writeBefore", data);
-                var newColFmt = colFmt(data.color, data);
-                c = 20 * Math.floor(data.x / 20);
-                l = 10 * Math.floor(data.y / 10);
-                u = c + "," + l;
-                if (!we.has(u)) return 0;
-                var s = we.get(u);
-                Ce.x = data.x;
-                Ce.y = data.y;
-                var d, f, v, h, y, g, p, b, x, w, M, k, E, S = 1, I = newColFmt, C = newColFmt, A = Ce.x - c + 20 * (Ce.y - l), T = s[o(212)][A], B = Zr(T), F = B[0], P = B[1], L = s.txt[A];
+                var d, f, v, h, y, g, p, b, x, w, M, k, E, S = 1, I = Math.floor(newColFmt / 31), C = newColFmt, A = Ce.x - c + 20 * (Ce.y - l), T = s[o(212)][A], B = Zr(T), F = B[0], P = B[1], L = s.txt[A];
                 return L == e && T == C || Qn(e, I) && Qn(L, P) || (M = P,
                     k = e,
                     E = I,
@@ -2785,20 +2781,6 @@
                         zn = 0),
                     !e || zn >= 3)
                     return 0;
-                var i = (e = Array.from(e)[0])[o(546)]();
-                if (nt[o(363)][o(427)] && qr(i))
-                    return 0;
-                var c = 20 * Math[o(437)](Ce.x / 20)
-                    , l = 10 * Math[o(437)](Ce.y / 10)
-                    , u = c + "," + l;
-                if (!we[o(361)](u))
-                    return 0;
-                var s = we[o(520)](u);
-                if ((s.protected || nt[o(435)][o(427)] || U && "" == je) && !m && 0 == j || null == s[o(704)] || K)
-                    return U && "" == je && !nt[o(435)][o(427)] && ir("Please log in before typing.", 3e3),
-                        0;
-                tt.rainbow[o(427)] && !r && (mr(Jn[Yn]),
-                    ++Yn == Jn.length && (Yn = 0));
                 var chr = prsFmt(Vr(pe, a ? 0 : ce()));
                 var data = {
                     char: e,
@@ -2812,11 +2794,20 @@
                 };
                 window.w.emit("writeBefore", data);
                 var newColFmt = colFmt(data.color, data);
-                c = 20 * Math.floor(data.x / 20);
-                l = 10 * Math.floor(data.y / 10);
-                u = c + "," + l;
-                if (!we.has(u)) return 0;
-                var s = we.get(u);
+                var i = (e = Array.from(e)[0])[o(546)]();
+                if (nt[o(363)][o(427)] && qr(i))
+                    return 0;
+                var c = 20 * Math[o(437)](data.x / 20)
+                    , l = 10 * Math[o(437)](data.y / 10)
+                    , u = c + "," + l;
+                if (!we[o(361)](u))
+                    return 0;
+                var s = we[o(520)](u);
+                if ((s.protected || nt[o(435)][o(427)] || U && "" == je) && !m && 0 == j || null == s[o(704)] || K)
+                    return U && "" == je && !nt[o(435)][o(427)] && ir("Please log in before typing.", 3e3),
+                        0;
+                tt.rainbow[o(427)] && !r && (mr(Jn[Yn]),
+                    ++Yn == Jn.length && (Yn = 0));
                 var d, f, v, h, y, g, p, b, x, w, M, k, E, S = 1, I = Math.floor(newColFmt / 31), C = newColFmt, A = data.x - c + 20 * (data.y - l), T = s[o(212)][A], B = Zr(T), F = B[0], P = B[1], L = s.txt[A];
                 return L == e && T == C || Qn(e, I) && Qn(L, P) || (M = P,
                     k = e,
