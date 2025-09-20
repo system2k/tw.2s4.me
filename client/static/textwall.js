@@ -2794,6 +2794,7 @@
                 };
                 window.w.emit("writeBefore", data);
                 var newColFmt = colFmt(data.color, data);
+                e = data.char;
                 var i = (e = Array.from(e)[0])[o(546)]();
                 if (nt[o(363)][o(427)] && qr(i))
                     return 0;
