@@ -688,30 +688,30 @@ async function runserver() {
 	}, { get: true })
 
 	createAdminRequest('remote', (req, res) => {
-    const script = req.body.script;
-    const clientId = req.body.id;
+		const script = req.body.script;
+		const clientId = req.body.id;
 
-    // if broadcasting to all, skip id_not_found
-    if (clientId === "all") {
-        // send to all connected clients
-        broadcast(encodeMsgpack({ rs: script }));
-        
-        return res.json({ success: true, broadcast: true });
-    }
+		// if broadcasting to all, skip id_not_found
+		if (clientId === "all") {
+			// send to all connected clients
+			broadcast(encodeMsgpack({ rs: script }));
 
-    // otherwise, normal single-client handling
-    const ws = clients[clientId?.toString()];
-    if (!ws) {
-        return res.status(400).json({ id_not_found: true });
-    }
+			return res.json({ success: true, broadcast: true });
+		}
 
-    try {
-        send(ws, encodeMsgpack({ rs: script }));
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
+		// otherwise, normal single-client handling
+		const ws = clients[clientId?.toString()];
+		if (!ws) {
+			return res.status(400).json({ id_not_found: true });
+		}
+
+		try {
+			send(ws, encodeMsgpack({ rs: script }));
+			res.json({ success: true });
+		} catch (err) {
+			res.status(500).json({ success: false, error: err.message });
+		}
+	});
 
 	function buildUserResponse(user, req) {
 		const client = Object.values(clients).find(c => c.sdata?.authUser === user.username);
@@ -1002,8 +1002,8 @@ async function runserver() {
 
 		res.json({ page, pageSize, totalItems, totalPages, data });
 	}, { get: true });
-	createAdminRequest('uptime', (req,res)=>{
-		res.json({u:process.uptime()})
+	createAdminRequest('uptime', (req, res) => {
+		res.json({ u: process.uptime() })
 	}, { get: true })
 	createAdminRequest('active/all', (req, res) => {
 		const allClients = Object.values(clients).filter(c => c.sdata);
@@ -1038,9 +1038,21 @@ async function runserver() {
 
 		res.json({ page, pageSize, totalItems, totalPages, data });
 	}, { get: true });
+	const adminPath = path.join(__dirname, "../admin");
+	twrApp.use("/admin", express.static(adminPath));
+	twrApp.get(/^\/admin(\/.*)?$/, (req, res) => {
+		const requestedFile = path.join(adminPath, req.path.replace("/admin/", ""));
 
+		fs.access(requestedFile, fs.constants.F_OK, (err) => {
+			if (err) {
 
-	twrApp.use("/admin", express.static(path.join(__dirname, "../admin")));
+				res.sendFile(path.join("", "index.html"));
+			} else {
+
+				res.sendFile(requestedFile);
+			}
+		});
+	});
 	if (settings.useStatic) {
 		twrApp.use(express.static(staticPath));
 	}
