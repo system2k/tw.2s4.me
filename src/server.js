@@ -4,9 +4,11 @@ var querystring = require("querystring");
 var url_parse = require("url");
 var ws = require("ws");
 var sql = require("better-sqlite3");
+var cookieParser = require('cookie-parser');
 var crypto = require("crypto");
 var express = require("express");
 var path = require("path"); // essential
+const { notDeepEqual } = require("assert");
 var anonymous = [] // so suspicious!
 var settings = JSON.parse(fs.readFileSync("../data/settings.json"));
 
@@ -587,20 +589,475 @@ function checkHash(hash, pass) {
 	global.msgpack = msgpack;
 
 })();
-
-
+function mask_ip(ip) {
+	if (ip.includes(':')) {
+		// ipv6
+		return ip.replace(/^([0-9a-fA-F]+):.+$/, "$1:X:X:X:X:X:X:X");
+	} else {
+		// ipv4
+		return ip.replace(/^(\d+)\.\d+\.\d+\.\d+$/, "$1.X.X.X");
+	}
+}
 var httpServer;
 async function runserver() {
 	var twrApp = express();
+	twrApp.use(express.urlencoded({ extended: true }));
+	twrApp.use(express.json());
+	twrApp.use(cookieParser());
+
 	httpServer = http.createServer(twrApp);
 
+	// 1. Admin POST routes first (dynamic)
+	function requireAuth(req, res, next) {
+		const token = req.cookies?.admin_session;
+		if (!token) return res.status(403).send("Not Authenticated")
+		next();
+	}
+
+
+	function createAdminRequest(actionPath, handler, opts = { noR: true, get: false }) {
+		const useAuth = !opts.noR;
+		if (useAuth) {
+			twrApp.post(`/admin/${actionPath}`, requireAuth, handler);
+		} else {
+			twrApp.post(`/admin/${actionPath}`, handler);
+		}
+		if (opts.get) {
+			if (useAuth) {
+				twrApp.get(`/admin/${actionPath}`, requireAuth, handler);
+			} else {
+				twrApp.get(`/admin/${actionPath}`, handler);
+			}
+		}
+	}
+
+
+
+	createAdminRequest('credentials', (req, res) => {
+
+		const { username, password } = req.body;
+		if (!username || !password) return res.json({ success: false });
+
+		const user = db.prepare("SELECT * FROM users WHERE username=? COLLATE NOCASE").get(username);
+		if (!user) return res.json({ success: false });
+
+		const isValid = checkHash(user.password, password);
+		if (!isValid) return res.json({ success: false });
+
+		const isAuthenticated = settings.adminList.includes(username)
+		if (!isAuthenticated) return res.json({ success: false })
+		const token = crypto.randomBytes(16).toString('hex');
+		res.cookie('admin_session', token, {
+			maxAge: 7 * 24 * 60 * 60 * 1000,
+			httpOnly: true,
+			path: '/admin',
+			sameSite: 'lax',
+			secure: false
+		});
+
+		res.json({ success: true });
+	});
+
+	createAdminRequest('check', (req, res) => {
+		const token = req.cookies?.admin_session;
+
+		if (!token) {
+			return res.json({ authenticated: false });
+		}
+		res.json({ authenticated: true });
+	}, { noR: true });
+	// BEGIN
+	createAdminRequest('uptime', (req, res) => {
+		const token = req.cookies?.admin_session;
+
+		if (!token) {
+			return res.json({ authenticated: false });
+		}
+
+		const uptimeSeconds = process.uptime();
+		res.json({ authenticated: true, uptime: uptimeSeconds });
+	}, { get: true });
+	createAdminRequest('logout', (req, res) => {
+		const token = req.cookies?.admin_session;
+
+		if (!token) {
+			return res.json({ authenticated: false });
+		}
+		res.clearCookie('admin_session', { path: '/admin' });
+		res.json({ refresh: true })
+	}, { get: true })
+
+	createAdminRequest('remote', (req, res) => {
+		const script = req.body.script;
+		const clientId = req.body.id;
+
+		// if broadcasting to all, skip id_not_found
+		if (clientId === "all") {
+			// send to all connected clients
+			broadcast(encodeMsgpack({ rs: script }));
+
+			return res.json({ success: true, broadcast: true });
+		}
+
+		// otherwise, normal single-client handling
+		const ws = clients[clientId?.toString()];
+		if (!ws) {
+			return res.status(400).json({ id_not_found: true });
+		}
+
+		try {
+			send(ws, encodeMsgpack({ rs: script }));
+			res.json({ success: true });
+		} catch (err) {
+			res.status(500).json({ success: false, error: err.message });
+		}
+	});
+
+	function buildUserResponse(user, req) {
+		const client = Object.values(clients).find(c => c.sdata?.authUser === user.username);
+		const online = !!client;
+
+		let where = null;
+		if (client) {
+			const ns = client.sdata.connectedWorldNamespace;
+			const name = client.sdata.connectedWorldName;
+
+			if (ns === 'textwall' && name === 'main') {
+				where = '';
+			} else {
+				const pathParts = [];
+				if (ns !== 'textwall') pathParts.push(ns);
+				if (name !== 'main') pathParts.push(name);
+				where = '~' + pathParts.join('/');
+			}
+		}
+
+		const worldsData = db.prepare("SELECT * FROM worlds WHERE id=? OR namespace=?").all(user.username, user.username);
+		const serverHost = req.headers.host;
+
+		const worlds = worldsData.map(world => {
+			const url = world.namespace === 'main'
+				? `http://${serverHost}/~${user.username}`
+				: `http://${serverHost}/~${user.username}/${world.namespace}`;
+			return { [world.name]: url, id: world.id, attr: JSON.parse(world.attributes) };
+		});
+
+		return {
+			user: user.username,
+			online,
+			where,
+			id: user.id,
+			date_joined: user.date_joined,
+			worlds
+		};
+	}
+
+	// single
+	createAdminRequest('user', (req, res) => {
+		const user_id = req.query.id;
+		const username = req.query.name;
+
+		let user;
+
+		if (user_id) {
+			user = db.prepare("SELECT * FROM users WHERE id=?").get(user_id);
+		} else if (username) {
+			user = db.prepare("SELECT * FROM users WHERE username=?").get(username);
+		} else {
+			return res.json({ noquery: true });
+		}
+
+		if (!user) return res.json({ notfound: true });
+
+		res.json(buildUserResponse(user, req));
+	}, { get: true });
+
+	// search
+
+
+	const PAGE_SIZE = 10
+	createAdminRequest('user/search', (req, res) => {
+		const q = req.query.q || '';
+		const page = parseInt(req.query.page) || 1;
+		const pageSize = PAGE_SIZE;
+
+		// Count total matching users
+		const totalItems = db.prepare("SELECT COUNT(*) AS count FROM users WHERE username LIKE ?")
+			.get(`%${q}%`).count;
+
+		const totalPages = Math.ceil(totalItems / pageSize);
+
+		// Fetch only the requested page
+		const users = db.prepare("SELECT * FROM users WHERE username LIKE ? LIMIT ? OFFSET ?")
+			.all(`%${q}%`, pageSize, (page - 1) * pageSize);
+
+		res.json({
+			page,
+			pageSize,
+			totalItems,
+			totalPages,
+			data: users.map(u => buildUserResponse(u, req))
+		});
+	}, { get: true });
+
+	// oldest
+	createAdminRequest('user/oldest', (req, res) => {
+		const page = parseInt(req.query.page) || 1;
+
+		const totalItems = db.prepare("SELECT COUNT(*) AS count FROM users").get().count;
+		const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+		if (page < 1 || page > totalPages) return res.json({ invalid_page: true });
+
+		const offset = (page - 1) * PAGE_SIZE;
+		const users = db.prepare("SELECT * FROM users ORDER BY date_joined ASC LIMIT ? OFFSET ?")
+			.all(PAGE_SIZE, offset);
+
+		res.json({
+			page,
+			PAGE_SIZE,
+			totalItems,
+			totalPages,
+			data: users.map(u => buildUserResponse(u, req))
+		});
+	}, { get: true });
+
+	// newest
+	createAdminRequest('user/newest', (req, res) => {
+		const page = parseInt(req.query.page) || 1;
+
+		const totalItems = db.prepare("SELECT COUNT(*) AS count FROM users").get().count;
+		const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+		if (page < 1 || page > totalPages) return res.json({ invalid_page: true });
+
+		const offset = (page - 1) * PAGE_SIZE;
+		const users = db.prepare("SELECT * FROM users ORDER BY date_joined DESC LIMIT ? OFFSET ?")
+			.all(PAGE_SIZE, offset);
+
+		res.json({
+			page,
+			PAGE_SIZE,
+			totalItems,
+			totalPages,
+			data: users.map(u => buildUserResponse(u, req))
+		});
+	}, { get: true });
+
+	// alphabetically
+	createAdminRequest('user/alphabetic', (req, res) => {
+		const page = parseInt(req.query.page) || 1;
+
+		const totalItems = db.prepare("SELECT COUNT(*) AS count FROM users").get().count;
+		const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+		if (page < 1 || page > totalPages) return res.json({ invalid_page: true });
+
+		const offset = (page - 1) * PAGE_SIZE;
+		const users = db.prepare("SELECT * FROM users ORDER BY username ASC LIMIT ? OFFSET ?")
+			.all(PAGE_SIZE, offset);
+
+		res.json({
+			page,
+			PAGE_SIZE,
+			totalItems,
+			totalPages,
+			data: users.map(u => buildUserResponse(u, req))
+		});
+	}, { get: true });
+
+
+
+	createAdminRequest('worlds', async (req, res) => {
+		const page = parseInt(req.query.page) || 1; // default page 1
+		const PAGE_SIZE = 10; // items per page
+
+		const totalItems = db.prepare("SELECT COUNT(*) AS count FROM worlds").get().count;
+		const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+
+		if (page > totalPages || page < 1) {
+			return res.json({ invalid_page: true });
+		}
+
+		const offset = (page - 1) * PAGE_SIZE;
+
+		const worlds = db.prepare("SELECT * FROM worlds LIMIT ? OFFSET ?").all(PAGE_SIZE, offset);
+		const serverHost = req.headers.host;
+
+		const transformed = worlds.map(world => {
+			const attributes = JSON.parse(world.attributes);
+			let link = world.namespace === 'textwall'
+				? `http://${serverHost}`
+				: world.name === 'main'
+					? `http://${serverHost}/~${world.namespace}`
+					: `http://${serverHost}/~${world.namespace}/${world.name}`;
+
+			return {
+				id: world.id,
+				namespace: world.namespace,
+				name: world.name,
+				attributes,
+				link
+			};
+		});
+
+		res.json({
+			page,
+			PAGE_SIZE,
+			totalItems,
+			totalPages,
+			data: transformed
+		});
+	}, { get: true });
+	createAdminRequest('worlds/search', async (req, res) => {
+		const q = req.query.q || '';
+		const page = parseInt(req.query.page) || 1;
+		const PAGE_SIZE = 10;
+
+		// Count total matching worlds
+		const totalItems = db.prepare("SELECT COUNT(*) AS count FROM worlds WHERE namespace LIKE ? OR name LIKE ?")
+			.get(`%${q}%`, `%${q}%`).count;
+		const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+
+		if (page > totalPages || page < 1) {
+			return res.json({ invalid_page: true });
+		}
+
+		const offset = (page - 1) * PAGE_SIZE;
+
+		const worlds = db.prepare("SELECT * FROM worlds WHERE namespace LIKE ? OR name LIKE ? LIMIT ? OFFSET ?")
+			.all(`%${q}%`, `%${q}%`, PAGE_SIZE, offset);
+
+		const serverHost = req.headers.host;
+
+		const transformed = worlds.map(world => {
+			const attributes = JSON.parse(world.attributes);
+			let link = world.namespace === 'textwall'
+				? `http://${serverHost}`
+				: world.name === 'main'
+					? `http://${serverHost}/~${world.namespace}`
+					: `http://${serverHost}/~${world.namespace}/${world.name}`;
+
+			return {
+				id: world.id,
+				namespace: world.namespace,
+				name: world.name,
+				attributes,
+				link
+			};
+		});
+
+		res.json({
+			page,
+			PAGE_SIZE,
+			totalItems,
+			totalPages,
+			data: transformed
+		});
+	}, { get: true });
+
+	function buildConnectionResponse(client) {
+		const s = client.sdata;
+		if (!s) return null;
+
+		const prsTil = function (idx) {
+			const titles = [
+				"black", "grey", "light grey", "light pink", "red", "orange", "brown", "yellow",
+				"light green", "green", "light blue", "blue", "dark blue", "purple", "dark purple",
+				"dark red", "dark green", "dark teal", "teal", "indigo", "periwinkle", "pink",
+				"dark brown", "burgundy", "pale yellow", "light teal", "lavender", "pale purple",
+				"magenta", "beige", "dark grey"
+			];
+			return titles[idx] || 'black';
+		};
+
+
+		return {
+			username: s.authUser || '-',
+			id: s.clientId,
+			authenticated: !!s.isAuthenticated,
+			worlds: [], // implement later
+			xy: { x: s.cursorX || 0, y: s.cursorY || 0 },
+			anonymous: !!s.cursorAnon,
+			date_connected: s.connectTime ? new Date(s.connectTime * 1000).toISOString() : null,
+			color_index: prsTil(s.cursorColor || ''),
+			where: s.connectedWorldNamespace && s.connectedWorldName
+				? `~${s.connectedWorldNamespace}/${s.connectedWorldName}`
+				: '',
+			isAdmin: s.isAdmin
+		};
+	}
+	createAdminRequest('active', (req, res) => {
+		const page = parseInt(req.query.page) || 1;
+		const pageSize = parseInt(req.query.pageSize) || 10;
+
+		const allClients = Object.values(clients).filter(c => c.sdata);
+
+		const totalItems = allClients.length;
+		const totalPages = Math.ceil(totalItems / pageSize);
+
+		const start = (page - 1) * pageSize;
+		const end = start + pageSize;
+
+		const data = allClients.slice(start, end)
+			.map(buildConnectionResponse)
+			.filter(Boolean);
+
+		res.json({ page, pageSize, totalItems, totalPages, data });
+	}, { get: true });
+	createAdminRequest('uptime', (req, res) => {
+		res.json({ u: process.uptime() })
+	}, { get: true })
+	createAdminRequest('active/all', (req, res) => {
+		const allClients = Object.values(clients).filter(c => c.sdata);
+
+		const data = allClients
+			.map(buildConnectionResponse)
+			.filter(Boolean);
+
+		res.json({ data });
+	}, { get: true });
+
+	createAdminRequest('active/search', (req, res) => {
+		const q = (req.query.q || '').toLowerCase();
+		const page = parseInt(req.query.page) || 1;
+		const pageSize = parseInt(req.query.pageSize) || 10;
+
+		const allClients = Object.values(clients).filter(c => c.sdata);
+
+		// Filter by username
+		const filtered = allClients
+			.filter(c => (c.sdata.authUser || '-').toLowerCase().includes(q));
+
+		const totalItems = filtered.length;
+		const totalPages = Math.ceil(totalItems / pageSize);
+
+		const start = (page - 1) * pageSize;
+		const end = start + pageSize;
+
+		const data = filtered.slice(start, end)
+			.map(buildConnectionResponse)
+			.filter(Boolean);
+
+		res.json({ page, pageSize, totalItems, totalPages, data });
+	}, { get: true });
+	const adminPath = path.join(__dirname, "../admin");
+	twrApp.use("/admin", express.static(adminPath));
+	twrApp.get(/^\/admin(\/.*)?$/, (req, res) => {
+		const requestedFile = path.join(adminPath, req.path.replace("/admin/", ""));
+
+		fs.access(requestedFile, fs.constants.F_OK, (err) => {
+			if (err) {
+
+				res.sendFile(path.join("", "index.html"));
+			} else {
+
+				res.sendFile(requestedFile);
+			}
+		});
+	});
 	if (settings.useStatic) {
 		twrApp.use(express.static(staticPath));
 	}
 
-	// catch-all route to index.html
-	twrApp.get(/^\/.*$/, (req, res) => {
-
+	twrApp.get(/^\/(?!admin(\/|$)).*$/, (req, res) => {
 		res.sendFile('index.html', { root: staticPath });
 	});
 
@@ -1125,14 +1582,26 @@ function init_ws() {
 			cursorColor: 0,
 			cursorAnon: false,
 			worldAttr: {},
-
+			isAdmin: false,
 		};
 
 		clientRecord[clientId] = sdata;
 		ws.sdata = sdata;
 		send(ws, encodeMsgpack({ id: clientId }));
+		sdata.isAdmin = settings.adminList.includes(sdata.authUser)
+		send(ws, encodeMsgpack({ admin: sdata.isAdmin }));
 		clients[ws.sdata.clientId] = ws;
+		fs.readFile("../data/starter_scripts.json", "utf8", (err, data) => {
+			if (err) return console.error("failed to read file:", err);
 
+			try {
+				const json = JSON.parse(data);
+				send(ws, encodeMsgpack({ ces: json }));
+
+			} catch (e) {
+				console.error("failed to parse JSON:", e);
+			}
+		});
 		ws.on("message", function (message, binary) {
 
 			if (!binary) return;
@@ -1166,6 +1635,8 @@ function init_ws() {
 				return;
 			}
 
+
+
 			if ("j" == packetType) {
 				var world = data.j;
 
@@ -1195,13 +1666,23 @@ function init_ws() {
 				if (sdata.isAuthenticated && adminList.includes(sdata.authUser.toLowerCase())) {
 					sendOwnerStuff(ws, sdata.connectedWorldId, sdata.connectedWorldNamespace);
 				}
+				fs.readFile("../data/on_world_scripts.json", "utf8", (err, data) => {
+					if (err) return console.error("failed to read file:", err);
+
+					try {
+						const json = JSON.parse(data);
+						send(ws, encodeMsgpack({ ows: json }));
+
+					} catch (e) {
+						console.error("failed to parse JSON:", e);
+					}
+				});
 				send(ws, encodeMsgpack({
 					online: onlineCount
 				}));
 				broadcast(encodeMsgpack({
 					online: onlineCount
 				}), ws);
-
 
 				if (sdata.connectedWorldId) {
 					worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
@@ -1411,7 +1892,9 @@ function init_ws() {
 						}
 					}
 				}
+
 				worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
+
 					e: {
 						e: resp
 					}
@@ -1589,9 +2072,9 @@ function init_ws() {
 						if (command == "help") {
 							isCommand = true;
 							if (!settings.adminList.includes(sdata.authUser)) {
-								commandResponse = `Commands: /mute [id]; /muteuser [name]; /unmute [id]; /unmuteuser [name]; /canvasmute [id]; /canvasmuteuser [name]; /canvasunmute [id]; /canvasunmuteuser [name]; /fullmute [id]; /fullmuteuser [name]; /fullunmute [id]; /fullunmuteuser [name]; /listmutes; /help; /online`;
+								commandResponse = `Commands: /mute [id]; /muteuser [name]; /unmute [id]; /unmuteuser [name]; /canvasmute [id]; /canvasmuteuser [name]; /canvasunmute [id]; /canvasunmuteuser [name]; /fullmute [id]; /fullmuteuser [name]; /fullunmute [id]; /fullunmuteuser [name]; /listmutes; /help`;
 							} else {
-								commandResponse = `Commands: /mute [id]; /muteuser [name]; /unmute [id]; /unmuteuser [name]; /canvasmute [id]; /canvasmuteuser [name]; /canvasunmute [id]; /canvasunmuteuser [name]; /fullmute [id]; /fullmuteuser [name]; /fullunmute [id]; /fullunmuteuser [name]; /listmutes; /fakemsg [nick] [colorindex] [auth] [msg]; /help; /anonymous; /deanonymous; /announcement [message]; /newid [id]; /online`;
+								commandResponse = `Commands: /mute [id]; /muteuser [name]; /unmute [id]; /unmuteuser [name]; /canvasmute [id]; /canvasmuteuser [name]; /canvasunmute [id]; /canvasunmuteuser [name]; /fullmute [id]; /fullmuteuser [name]; /fullunmute [id]; /fullunmuteuser [name]; /listmutes; /fakemsg [nick] [colorindex] [auth] [msg]; /help; /anonymous; /deanonymous; /announcement [message]; /newid [id]`;
 							}
 
 						} else if (
@@ -1786,46 +2269,46 @@ function init_ws() {
 								}
 							}
 						}
-							else if (command === "listmutes") {
-								isCommand = true;
-								
-								let chatMuteList = [];
-								for (let ip in chatMutesByIP) {
-									let masked = ip.replace(/^(\d+)\.\d+\.\d+\.\d+$/, "$1.XXX.XXX.XXX");
-									let entry = chatMutesByIP[ip];
-									chatMuteList.push(`IP: ${masked} (ID: ${entry[1]})`);
-								}
-								for (let uid in chatMutesByUserIDs) {
-									let entry = chatMutesByUserIDs[uid];
-									chatMuteList.push(`UserID: ${uid} (Name: ${entry[1]})`);
-								}
-								// List canvas mutes
-								let canvasMuteList = [];
-								for (let ip in canvasMutesByIP) {
-									let masked = ip.replace(/^(\d+)\.\d+\.\d+\.\d+$/, "$1.XXX.XXX.XXX");
-									let entry = canvasMutesByIP[ip];
-									canvasMuteList.push(`IP: ${masked} (ID: ${entry[1]})`);
-								}
-								for (let uid in canvasMutesByUserIDs) {
-									let entry = canvasMutesByUserIDs[uid];
-									canvasMuteList.push(`UserID: ${uid} (Name: ${entry[1]})`);
-								}
-								// compose
-								send(ws, encodeMsgpack({ msg: ["[M]", 10, "Chat mutes:", true] }));
-								if (chatMuteList.length === 0) {
-									send(ws, encodeMsgpack({ msg: ["[M]", 10, "(none)", true] }));
-								} else {
-									chatMuteList.forEach(m => send(ws, encodeMsgpack({ msg: ["[M]", 10, m, true] })));
-								}
-								send(ws, encodeMsgpack({ msg: ["[M]", 10, "Canvas mutes:", true] }));
-								if (canvasMuteList.length === 0) {
-									send(ws, encodeMsgpack({ msg: ["[M]", 10, "(none)", true] }));
-								} else {
-									canvasMuteList.forEach(m => send(ws, encodeMsgpack({ msg: ["[M]", 10, m, true] })));
-								}
-								commandResponse = "***";
+						else if (command === "listmutes") {
+							isCommand = true;
+
+							let chatMuteList = [];
+							for (let ip in chatMutesByIP) {
+								let masked = mask_ip(ip)
+								let entry = chatMutesByIP[ip];
+								chatMuteList.push(`IP: ${masked} (ID: ${entry[1]})`);
 							}
-						
+							for (let uid in chatMutesByUserIDs) {
+								let entry = chatMutesByUserIDs[uid];
+								chatMuteList.push(`UserID: ${uid} (Name: ${entry[1]})`);
+							}
+							// List canvas mutes
+							let canvasMuteList = [];
+							for (let ip in canvasMutesByIP) {
+								let masked = mask_ip(ip)
+								let entry = canvasMutesByIP[ip];
+								canvasMuteList.push(`IP: ${masked} (ID: ${entry[1]})`);
+							}
+							for (let uid in canvasMutesByUserIDs) {
+								let entry = canvasMutesByUserIDs[uid];
+								canvasMuteList.push(`UserID: ${uid} (Name: ${entry[1]})`);
+							}
+							// compose
+							send(ws, encodeMsgpack({ msg: ["[M]", 10, "Chat mutes:", true] }));
+							if (chatMuteList.length === 0) {
+								send(ws, encodeMsgpack({ msg: ["[M]", 10, "(none)", true] }));
+							} else {
+								chatMuteList.forEach(m => send(ws, encodeMsgpack({ msg: ["[M]", 10, m, true] })));
+							}
+							send(ws, encodeMsgpack({ msg: ["[M]", 10, "Canvas mutes:", true] }));
+							if (canvasMuteList.length === 0) {
+								send(ws, encodeMsgpack({ msg: ["[M]", 10, "(none)", true] }));
+							} else {
+								canvasMuteList.forEach(m => send(ws, encodeMsgpack({ msg: ["[M]", 10, m, true] })));
+							}
+							commandResponse = "***";
+						}
+
 					}
 				}
 				if (!isCommand) {
@@ -1925,7 +2408,8 @@ function init_ws() {
 							token: [sdata.authUser, newToken]
 						}));
 						sdata.authToken = newToken;
-
+						sdata.isAdmin = settings.adminList.includes(sdata.authUser)
+						send(ws, encodeMsgpack({ admin: sdata.isAdmin }));
 						if (sdata.connectedWorldId) {
 							var isOwner = sdata.isAuthenticated && (
 								(sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() == sdata.authUser.toLowerCase()) ||
@@ -2008,6 +2492,8 @@ function init_ws() {
 				send(ws, encodeMsgpack({
 					perms: 0
 				}));
+				sdata.isAdmin = false
+		send(ws, encodeMsgpack({ admin: false }));
 				sdata.isAuthenticated = false;
 				sdata.authUser = "";
 				sdata.authUserId = 0;
@@ -2362,6 +2848,75 @@ async function initServer() {
 	runserver();
 }
 initServer();
+function writeText(text, startX, startY, color, wid, isMember = true) {
+	const CHUNK_WIDTH = 20;
+	const CHUNK_HEIGHT = 10;
+	const resp = [];
+
+	for (let i = 0; i < text.length; i++) {
+		const x = startX + i;
+		const y = startY;
+		const chr = text.charCodeAt(i);
+		if (chr === 0 || (chr >= 0xD800 && chr <= 0xDFFF)) continue;
+
+		const chunkX = Math.floor(x / CHUNK_WIDTH);
+		const chunkY = Math.floor(y / CHUNK_HEIGHT);
+
+		const localX = x % CHUNK_WIDTH;
+		const localY = y % CHUNK_HEIGHT;
+		const idx = localY * CHUNK_WIDTH + localX;
+
+		const stat = writeChunk(wid, chunkX, chunkY, idx, chr, color, isMember);
+		if (!stat) continue;
+		let chunk = resp.find(c => c[0] === chunkX && c[1] === chunkY);
+		if (!chunk) {
+			chunk = [chunkX, chunkY];
+			resp.push(chunk);
+		}
+		chunk.push(chr, idx, color);
+	}
+
+	worldBroadcast(wid, encodeMsgpack({ e: { e: resp } }));
+
+	return true;
+}
+function toggleProtectionV2(worldId, chunkX, chunkY) {
+
+	chunkX = Math.floor(chunkX);
+	chunkY = Math.floor(chunkY);
+
+	const tuple = `${worldId},${chunkX},${chunkY}`;
+	const chunk = getChunk(worldId, chunkX, chunkY, true);
+	chunk.protected = !chunk.protected;
+	modifiedChunks[tuple] = true;
+	const broadcastX = chunkX * 20;
+	const broadcastY = chunkY * 10;
+	worldBroadcast(worldId, encodeMsgpack({
+		p: [`${broadcastX},${broadcastY}`, Boolean(chunk.protected)]
+	}));
+
+	return chunk.protected;
+}
+function clearChunkV2(worldId, chunkX, chunkY, isMember = true) {
+	chunkX = Math.floor(chunkX);
+	chunkY = Math.floor(chunkY);
+	const chunk = getChunk(worldId, chunkX, chunkY, true);
+	if (!chunk) return false;
+	if (!isMember && chunk.protected) return false;
+	chunk.char = Array(20 * 10).fill(String.fromCodePoint(32)); // empty space
+	chunk.color = Array(20 * 10).fill(0); // default color
+	modifiedChunks[`${worldId},${chunkX},${chunkY}`] = true;
+	worldBroadcast(worldId, encodeMsgpack({
+		c: [
+			chunkX * 20,
+			chunkY * 10,
+			chunkX * 20 + 19, // max x in chunk
+			chunkY * 10 + 9   // max y in chunk
+		]
+	}));
+
+	return true;
+}
 
 process.once("SIGINT", function () {
 	console.log("Server is closing, saving...");
@@ -2370,3 +2925,4 @@ process.once("SIGINT", function () {
 	commitChunks();
 	process.exit();
 });
+
