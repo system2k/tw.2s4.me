@@ -2492,6 +2492,8 @@ function init_ws() {
 				send(ws, encodeMsgpack({
 					perms: 0
 				}));
+				sdata.isAdmin = false
+		send(ws, encodeMsgpack({ admin: false }));
 				sdata.isAuthenticated = false;
 				sdata.authUser = "";
 				sdata.authUserId = 0;
