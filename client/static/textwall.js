@@ -260,56 +260,13 @@
                 br("underline", Boolean(2 & e)),
                 br("strikethrough", Boolean(1 & e))
         }
+        // palette
         const ue = 192
-            , se = ["#000000", "#898D90", "#D4D7D9", "#FF99AA", "#FF4500", "#FFA800", "#9C6926", "#FFD635", "#7EED56", "#00CC78", "#51E9F4", "#3690EA", "#2450A4", "#B44AC0", "#811E9F", "#BE0039", "#00A368", "#00756F", "#009EAA", "#493AC1", "#6A5CFF", "#FF3881", "#6D482F", "#6D001A", "#FFF8B8", "#00CCC0", "#94B3FF", "#E4ABFF", "#DE107F", "#FFB470", "#515252"]
-            , de = ["black", "grey", "light grey", "light pink", "red", "orange", "brown", "yellow", "light green", "green", "light blue", "blue", "dark blue", "purple", "dark purple", "dark red", "dark green", "dark teal", "teal", "indigo", "periwinkle", "pink", "dark brown", "burgundy", "pale yellow", "light teal", "lavender", "pale purple", "magenta", "beige", "dark grey"]
-            , fe = [0, 30, 1, 2, 23, 15, 4, 5, 7, 24, 16, 9, 8, 17, 18, 25, 12, 11, 10, 19, 20, 26, 14, 13, 27, 28, 21, 3, 22, 6, 29];
-        // addons
-        const rgbse = [
-            [200, 50, 50],     // muted red
-            [80, 180, 60],     // muted green
-            [60, 100, 200],    // muted blue
-            [220, 180, 60],    // mustard yellow
-            [220, 140, 60],    // soft orange
-            [140, 80, 150],    // muted purple
-            [240, 160, 170],   // pastel pink
-            [130, 80, 50],     // earthy brown
-            [70, 200, 200],    // cyan-ish, softer
-            [200, 100, 180],   // pink-magenta
-            [180, 180, 180],   // light silver/gray
-            [120, 120, 120],   // muted gray
-            [60, 130, 130],    // teal-ish
-            [50, 120, 60],     // dark green
-            [130, 50, 50],     // muted maroon
-            [50, 50, 120],     // muted navy
-            [220, 200, 50],    // soft gold
-            [160, 200, 240],   // soft light blue
-            [140, 220, 140],   // soft light green
-            [220, 100, 80]     // muted tomato
-        ];
-
-        const rgbde = [
-            "muted red",        // [200,50,50]
-            "soft green",       // [80,180,60]
-            "muted blue",       // [60,100,200]
-            "mustard yellow",   // [220,180,60]
-            "soft orange",      // [220,140,60]
-            "muted purple",     // [140,80,150]
-            "pastel pink",      // [240,160,170]
-            "earthy brown",     // [130,80,50]
-            "soft cyan",        // [70,200,200]
-            "pink-magenta",     // [200,100,180]
-            "light silver",     // [180,180,180]
-            "muted gray",       // [120,120,120]
-            "teal-ish",         // [60,130,130]
-            "dark green",       // [50,120,60]
-            "muted maroon",     // [130,50,50]
-            "muted navy",       // [50,50,120]
-            "soft gold",        // [220,200,50]
-            "soft light blue",  // [160,200,240]
-            "soft light green", // [140,220,140]
-            "muted tomato"      // [220,100,80]
-        ];
+            , se = ["#000000", "#515252", "#787878", "#898D90", "#B4B4B4", "#D4D7D9", "#6D001A", "#BE0039", "#FF4500", "#FFA800", "#DCB43C", "#DCC832", "#FFD635", "#823232", "#C83232", "#DC6450", "#6D482F", "#825032", "#9C6926", "#DC8C3C", "#FFB470", "#FFF8B8", "#32783C", "#50B43C", "#7EED56", "#00A368", "#00CC78", "#8CDC8C", "#00756F", "#3C8282", "#009EAA", "#00CCC0", "#46C8C8", "#323278", "#2450A4", "#3C64C8", "#3690EA", "#51E9F4", "#493AC1", "#6A5CFF", "#94B3FF", "#A0C8F0", "#811E9F", "#8C5096", "#B44AC0", "#C864B4", "#E4ABFF", "#DE107F", "#FF3881", "#F0A0AA", "#FF99AA"]
+            , de = ["black", "dark grey", "muted grey", "grey", "light silver", "light grey", "burgundy", "dark red", "red", "orange", "mustard yellow", "soft gold", "yellow", "muted maroon", "muted red", "muted tomato", "dark brown", "earthy brown", "brown", "soft orange", "beige", "pale yellow", "forest green", "soft green", "light green", "dark green", "green", "soft light green", "dark teal", "teal-ish", "teal", "light teal", "soft cyan", "muted navy", "dark blue", "muted blue", "blue", "light blue", "indigo", "periwinkle", "lavender", "soft light blue", "dark purple", "muted purple", "purple", "pink-magenta", "pale purple", "magenta", "pink", "pastel pink", "light pink"]
+            , fe = [0, 29, 31, 30, 32, 1, 13, 25, 23, 15, 33, 34, 5, 35, 36, 37, 14, 38, 4, 39, 6, 27, 42, 40, 7, 12, 24, 41, 11, 43, 10, 28, 44, 45, 8, 46, 9, 16, 19, 20, 21, 47, 18, 48, 17, 49, 3, 22, 26, 50, 2];
+        const se_map = [0, 3, 5, 50, 8, 9, 18, 12, 24, 26, 37, 36, 34, 44, 42, 7, 25, 28, 30, 38, 39, 48, 16, 6, 21, 31, 40, 46, 47, 20, 1];
+        const se_unmap = [0,30,[120,120,120],1,[180,180,180],2,23,15,4,5,[220,180,60],[220,200,50],7,[130,50,50],[200,50,50],[220,100,80],22,[130,80,50],6,[220,140,60],29,24,[50,120,60],[80,180,60],8,16,9,[140,220,140],17,[60,130,130],18,25,[70,200,200],[50,50,120],12,[60,100,200],11,10,19,20,26,[160,200,240],14,[140,80,150],13,[200,100,180],27,28,21,[240,160,170],3];
         function ve(e) {
             for (var t = n, r = 0; r < se["length"]; r++)
                 if (fe[r] == e)
@@ -321,7 +278,7 @@
             var e = n;
             for (ne = 0; ne < se["length"]; ne++)
                 try {
-                    me[ne] = Yr(se[ne], .2);
+                    me[ne] = Yr(se[se_map[ne]], .2);
                 } catch (t) {
                     me[ne] = "rgba(128, 128, 128, 0.2)";
                 }
@@ -715,7 +672,7 @@
                 e["fillStyle"] = "rgb(" + rgb888[0] + "," + rgb888[1] + "," + rgb888[2] + ")";
             } else {
 
-                e["fillStyle"] = xe && 0 == t ? "#FFFFFF" : se[t];
+                e["fillStyle"] = xe && 0 == t ? "#FFFFFF" : se[se_map[t]];
 
             }
         }
@@ -1014,7 +971,7 @@
                 c["checked"] = 1 == d["highlighted"],
                 a.appendChild(c);
             var f = d.c;
-            o["style"].backgroundColor = "#FFFFFF" == se[f] ? "#222222" : se[f],
+            o["style"].backgroundColor = "#FFFFFF" == se[se_map[f]] ? "#222222" : se[se_map[f]],
                 o.style["fontSize"] = "10px",
                 o["style"].userSelect = "all",
                 o["innerText"] = d.n || e,
@@ -1066,7 +1023,14 @@
                                             Ce.start = Ce.x,
                                             e["altKey"]) {
                                             var a = rr();
-                                            a && (Qn(a[0], Zr(a[1])[1]) ? mr(0) : mr(Zr(a[1])[0]))
+                                            if (a) {
+                                                if (Qn(a[0], Zr(a[1])[1])) {
+                                                    mr(0);
+                                                } else {
+                                                    if (Array.isArray(a[1])) mr(Zr(a[1])[0]);
+                                                    else mr(se_map[Zr(a[1])[0]]);
+                                                }
+                                            }
                                         }
                                         Hn()
                                     }
@@ -1271,6 +1235,7 @@
                     var r = pe,
                         a = ce(),
                         o = Zr(n[3]);
+                    if (!Array.isArray(o[0])) o[0] = se_map[o[0]];
                     pe = o[0];
                     window.color = pe;
                     le(o[1]);
@@ -1290,13 +1255,15 @@
                     var n = pe
                         , a = ce()
                         , o = Zr(t[3]);
-                    pe = o[0],
-                        window.color = pe,
-                        le(o[1]),
-                        Vn(t[2], 1, !1),
-                        pe = n,
-                        window.color = pe,
-                        le(a)
+                    if (!Array.isArray(o[0])) o[0] = se_map[o[0]];
+                    pe = o[0];
+                    window.color = pe;
+                    le(o[1]);
+
+                    Vn(t[2], 1, true);
+                    pe = n;
+                    window.color = pe;
+                    le(a);
                 }
             },
             updateUndoRedoUI = function () {
@@ -3596,7 +3563,7 @@
                 !e || zn >= 3)
                 return 0;
             var decos2 = ce2();
-            var chr = prsFmt(pe);
+            var chr = prsFmt(Array.isArray(pe) ? pe : se_unmap[pe]);
             var data = {
                 char: e,
                 color: chr.color,
@@ -3792,6 +3759,7 @@
                             var rawVal = token.charCodeAt(0) - 192;
                             var fmt = prsFmt(rawVal);
 
+                            if (!Array.isArray(fmt.color)) fmt.color = se_map[fmt.color]
                             mr(fmt.color);
                             le((fmt.bold ? 8 : 0) | (fmt.italic ? 4 : 0) | (fmt.underline ? 2 : 0) | (fmt.strikethrough ? 1 : 0));
                         }
@@ -3854,7 +3822,7 @@
                                 if (Array.isArray(g[1])) {
                                     var rgb = g[1];
                                     d += "[";
-                                    for (var i = 0; i < 3; i++) {
+                                    for (let i = 0; i < 3; i++) {
                                         d += String.fromCharCode(192 + (rgb[i] >> 6)) +
                                             String.fromCharCode(192 + (rgb[i] & 63));
                                     }
@@ -3924,8 +3892,6 @@
 
             var palette = Array.isArray(se) ? se : [];
             var paletteTitles = Array.isArray(de) ? de : [];
-            var addons = Array.isArray(rgbse) ? rgbse : [];
-            var addonTitles = Array.isArray(rgbde) ? rgbde : [];
 
             function cssToRGB(css) {
                 if (!css && css !== "") return null;
@@ -3976,40 +3942,11 @@
                 return Math.sqrt(dl * dl + da * da + db * db);
             }
 
-            var paletteLab = [];
-            for (var p = 0; p < palette.length; p++) {
-                var rgb = cssToRGB(palette[p]);
-                paletteLab.push(rgb ? srgbToLab(rgb) : null);
-            }
-
-            var mapped = [];
-            for (var i = 0; i < addons.length; i++) {
-                var rgb = Array.isArray(addons[i]) && addons[i].length >= 3
-                    ? [Number(addons[i][0]) || 0, Number(addons[i][1]) || 0, Number(addons[i][2]) || 0]
-                    : (typeof addons[i] === 'string' ? cssToRGB(addons[i]) : null);
-                var nearest = null, bestDist = Infinity;
-                if (rgb && paletteLab.length) {
-                    var lab = srgbToLab(rgb);
-                    for (var j = 0; j < paletteLab.length; j++) {
-                        if (!paletteLab[j]) continue;
-                        var dist = labDistance(lab, paletteLab[j]);
-                        if (dist < bestDist) { bestDist = dist; nearest = j; }
-                    }
-                }
-                mapped.push({ i: i, rgb: rgb, title: addonTitles[i] || "", nearest: nearest, dist: bestDist });
-            }
-
-            var groups = {};
-            for (var k = 0; k < mapped.length; k++) {
-                var m = mapped[k];
-                var key = (m.nearest === null) ? "__end" : String(m.nearest);
-                if (!groups[key]) groups[key] = [];
-                groups[key].push(m);
-            }
-
-            Object.keys(groups).forEach(function (key) {
-                groups[key].sort(function (a, b) { return (a.dist || 0) - (b.dist || 0); });
-            });
+            // var paletteLab = [];
+            // for (var p = 0; p < palette.length; p++) {
+            //     var rgb = cssToRGB(palette[p]);
+            //     paletteLab.push(rgb ? srgbToLab(rgb) : null);
+            // }
 
             var frag = document.createDocumentFragment();
 
@@ -4027,51 +3964,6 @@
                     });
                 })(pi);
                 frag.appendChild(palEl);
-
-                var group = groups[String(pi)];
-                if (group) {
-                    for (var g = 0; g < group.length; g++) {
-                        var obj = group[g];
-                        var aEl = document.createElement("div");
-                        aEl.classList.add("colour", "swatch-a");
-                        aEl.dataset.addonIndex = obj.i;
-                        aEl.style.backgroundColor = obj.rgb ? ("rgb(" + obj.rgb[0] + "," + obj.rgb[1] + "," + obj.rgb[2] + ")") : "";
-                        aEl.title = obj.title || "";
-                        (function (el) {
-                            el.addEventListener("click", function (evt) {
-                                var extractedRGB = cssToRGB(el.style.backgroundColor);
-                                _30c = extractedRGB;
-                                mr(extractedRGB, false, true);
-                                document.querySelectorAll(".swatch-p.selected, .swatch-a.selected, #customcolour.selected").forEach(function (s) { s.classList.remove("selected") });
-                                el.classList.add("selected");
-                                nn(evt);
-                            });
-                        })(aEl);
-                        frag.appendChild(aEl);
-                    }
-                }
-            }
-
-            if (groups["__end"]) {
-                for (var e = 0; e < groups["__end"].length; e++) {
-                    var obj = groups["__end"][e];
-                    var aEl2 = document.createElement("div");
-                    aEl2.classList.add("colour", "swatch-a");
-                    aEl2.dataset.addonIndex = obj.i;
-                    aEl2.style.backgroundColor = obj.rgb ? ("rgb(" + obj.rgb[0] + "," + obj.rgb[1] + "," + obj.rgb[2] + ")") : "";
-                    aEl2.title = obj.title || "";
-                    (function (el) {
-                        el.addEventListener("click", function (evt) {
-                            var extractedRGB = cssToRGB(el.style.backgroundColor);
-                            _30c = extractedRGB;
-                            mr(extractedRGB, false, true);
-                            document.querySelectorAll(".swatch-p.selected, .swatch-a.selected, #customcolour.selected").forEach(function (s) { s.classList.remove("selected") });
-                            el.classList.add("selected");
-                            nn(evt);
-                        });
-                    })(aEl2);
-                    frag.appendChild(aEl2);
-                }
             }
 
             w.appendChild(frag);
@@ -4129,8 +4021,6 @@
             if (select) {
                 // remove selection from palette swatches
                 document.querySelectorAll(".swatch-p.selected").forEach(el => el.classList.remove("selected"));
-                // remove selection from addon swatches
-                document.querySelectorAll(".swatch-a.selected").forEach(el => el.classList.remove("selected"));
                 // remove selection from custom color
                 const custom = document.querySelector("#customcolour.selected, .customcolour.selected");
                 if (custom) custom.classList.remove("selected");
@@ -4141,19 +4031,16 @@
                 be = xe && e === 0 ? "rgba(255,255,255,0.6)" : Yr(se[e], 0.6);
                 newEl = document.querySelector(`.swatch-p[data-index='${e}']`);
             }
-            else if (typeof e === "number" && e >= se.length) {
-                let addonIndex = e - se.length;
-                let obj = rgbse[addonIndex];
-                if (obj) {
-                    be = gst(Array.isArray(obj) ? ("rgb(" + obj[0] + "," + obj[1] + "," + obj[2] + ")") : obj, 0.6);
-                    newEl = document.querySelector(`.swatch-a[data-addon-index='${addonIndex}']`);
-                }
-            }
             else if (hexColor) {
                 be = gst(hexColor, 0.6);
-                let ct = document.querySelector("#customcolour");
-                if (ct && ct.jscolor) ct.jscolor.fromString(hexColor);
-                newEl = ct;
+                let i = se.indexOf(hexColor.toUpperCase());
+                if (i >= 0) {
+                    newEl = document.querySelector(`.swatch-p[data-index='${i}']`);
+                } else {
+                    let ct = document.querySelector("#customcolour");
+                    if (ct && ct.jscolor) ct.jscolor.fromString(hexColor);
+                    newEl = ct;
+                }
             }
             if (select) if (newEl) newEl.classList.add("selected");
 
@@ -4162,7 +4049,7 @@
         }
 
 
-        let total = se.length + rgbse.length;
+        let total = se.length;
 
         if (w.children.length > 0) a = !0;
         sr();
