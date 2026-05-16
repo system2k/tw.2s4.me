@@ -262,10 +262,11 @@
         }
         // palette
         const ue = 192
-            , se = ["#000000", "#515252", "#787878", "#898D90", "#B4B4B4", "#D4D7D9", "#6D001A", "#BE0039", "#FF4500", "#FFA800", "#DCB43C", "#DCC832", "#FFD635", "#823232", "#C83232", "#DC6450", "#6D482F", "#825032", "#9C6926", "#DC8C3C", "#FFB470", "#FFF8B8", "#50B43C", "#7EED56", "#8CDC8C", "#32783C", "#00A368", "#00CC78", "#00756F", "#3C8282", "#009EAA", "#00CCC0", "#46C8C8", "#A0C8F0", "#323278", "#2450A4", "#3C64C8", "#3690EA", "#51E9F4", "#493AC1", "#6A5CFF", "#94B3FF", "#811E9F", "#8C5096", "#B44AC0", "#C864B4", "#E4ABFF", "#DE107F", "#FF3881", "#F0A0AA", "#FF99AA"]
-            , de = ["black", "dark grey", "muted gray", "grey", "light silver", "light grey", "burgundy", "dark red", "red", "orange", "mustard yellow", "soft gold", "yellow", "muted maroon", "muted red", "muted tomato", "dark brown", "earthy brown", "brown", "soft orange", "beige", "pale yellow", "soft green", "light green", "soft light green", "forest green", "dark green", "green", "dark teal", "teal-ish", "teal", "light teal", "soft cyan", "soft light blue", "muted navy", "dark blue", "muted blue", "blue", "light blue", "indigo", "periwinkle", "lavender", "dark purple", "muted purple", "purple", "pink-magenta", "pale purple", "magenta", "pink", "pastel pink", "light pink"]
-            , fe = [0, 29, 31, 30, 32, 1, 13, 25, 23, 15, 33, 34, 5, 35, 36, 37, 14, 38, 4, 39, 6, 27, 40, 7, 41, 42, 12, 24, 11, 43, 10, 28, 44, 45, 46, 8, 47, 9, 16, 19, 20, 21, 18, 48, 17, 49, 3, 22, 26, 50, 2];
-        const se_map = [0, 3, 5, 50, 8, 9, 18, 12, 23, 27, 38, 37, 35, 44, 42, 7, 26, 28, 30, 39, 40, 48, 16, 6, 21, 31, 41, 46, 47, 20, 1];
+            , se = ["#000000", "#515252", "#787878", "#898D90", "#B4B4B4", "#D4D7D9", "#6D001A", "#BE0039", "#FF4500", "#FFA800", "#DCB43C", "#DCC832", "#FFD635", "#823232", "#C83232", "#DC6450", "#6D482F", "#825032", "#9C6926", "#DC8C3C", "#FFB470", "#FFF8B8", "#32783C", "#50B43C", "#7EED56", "#00A368", "#00CC78", "#8CDC8C", "#00756F", "#3C8282", "#009EAA", "#00CCC0", "#46C8C8", "#323278", "#2450A4", "#3C64C8", "#3690EA", "#51E9F4", "#493AC1", "#6A5CFF", "#94B3FF", "#A0C8F0", "#811E9F", "#8C5096", "#B44AC0", "#C864B4", "#E4ABFF", "#DE107F", "#FF3881", "#F0A0AA", "#FF99AA"]
+            , de = ["black", "dark grey", "muted grey", "grey", "light silver", "light grey", "burgundy", "dark red", "red", "orange", "mustard yellow", "soft gold", "yellow", "muted maroon", "muted red", "muted tomato", "dark brown", "earthy brown", "brown", "soft orange", "beige", "pale yellow", "forest green", "soft green", "light green", "dark green", "green", "soft light green", "dark teal", "teal-ish", "teal", "light teal", "soft cyan", "muted navy", "dark blue", "muted blue", "blue", "light blue", "indigo", "periwinkle", "lavender", "soft light blue", "dark purple", "muted purple", "purple", "pink-magenta", "pale purple", "magenta", "pink", "pastel pink", "light pink"]
+            , fe = [0, 29, 31, 30, 32, 1, 13, 25, 23, 15, 33, 34, 5, 35, 36, 37, 14, 38, 4, 39, 6, 27, 42, 40, 7, 12, 24, 41, 11, 43, 10, 28, 44, 45, 8, 46, 9, 16, 19, 20, 21, 47, 18, 48, 17, 49, 3, 22, 26, 50, 2];
+        const se_map = [0, 3, 5, 50, 8, 9, 18, 12, 24, 26, 37, 36, 34, 44, 42, 7, 25, 28, 30, 38, 39, 48, 16, 6, 21, 31, 40, 46, 47, 20, 1];
+        const se_unmap = [0,30,[120,120,120],1,[180,180,180],2,23,15,4,5,[220,180,60],[220,200,50],7,[130,50,50],[200,50,50],[220,100,80],22,[130,80,50],6,[220,140,60],29,24,[50,120,60],[80,180,60],8,16,9,[140,220,140],17,[60,130,130],18,25,[70,200,200],[50,50,120],12,[60,100,200],11,10,19,20,26,[160,200,240],14,[140,80,150],13,[200,100,180],27,28,21,[240,160,170],3];
         function ve(e) {
             for (var t = n, r = 0; r < se["length"]; r++)
                 if (fe[r] == e)
@@ -1234,6 +1235,7 @@
                     var r = pe,
                         a = ce(),
                         o = Zr(n[3]);
+                    if (!Array.isArray(o[0])) o[0] = se_map[o[0]];
                     pe = o[0];
                     window.color = pe;
                     le(o[1]);
@@ -1253,13 +1255,15 @@
                     var n = pe
                         , a = ce()
                         , o = Zr(t[3]);
-                    pe = o[0],
-                        window.color = pe,
-                        le(o[1]),
-                        Vn(t[2], 1, !1),
-                        pe = n,
-                        window.color = pe,
-                        le(a)
+                    if (!Array.isArray(o[0])) o[0] = se_map[o[0]];
+                    pe = o[0];
+                    window.color = pe;
+                    le(o[1]);
+
+                    Vn(t[2], 1, true);
+                    pe = n;
+                    window.color = pe;
+                    le(a);
                 }
             },
             updateUndoRedoUI = function () {
@@ -3559,7 +3563,7 @@
                 !e || zn >= 3)
                 return 0;
             var decos2 = ce2();
-            var chr = prsFmt(pe);
+            var chr = prsFmt(Array.isArray(pe) ? pe : se_unmap[pe]);
             var data = {
                 char: e,
                 color: chr.color,
@@ -3755,6 +3759,7 @@
                             var rawVal = token.charCodeAt(0) - 192;
                             var fmt = prsFmt(rawVal);
 
+                            if (!Array.isArray(fmt.color)) fmt.color = se_map[fmt.color]
                             mr(fmt.color);
                             le((fmt.bold ? 8 : 0) | (fmt.italic ? 4 : 0) | (fmt.underline ? 2 : 0) | (fmt.strikethrough ? 1 : 0));
                         }
@@ -3817,7 +3822,7 @@
                                 if (Array.isArray(g[1])) {
                                     var rgb = g[1];
                                     d += "[";
-                                    for (var i = 0; i < 3; i++) {
+                                    for (let i = 0; i < 3; i++) {
                                         d += String.fromCharCode(192 + (rgb[i] >> 6)) +
                                             String.fromCharCode(192 + (rgb[i] & 63));
                                     }
