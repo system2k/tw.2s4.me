@@ -4033,9 +4033,14 @@
             }
             else if (hexColor) {
                 be = gst(hexColor, 0.6);
-                let ct = document.querySelector("#customcolour");
-                if (ct && ct.jscolor) ct.jscolor.fromString(hexColor);
-                newEl = ct;
+                let i = se.indexOf(hexColor.toUpperCase());
+                if (i >= 0) {
+                    newEl = document.querySelector(`.swatch-p[data-index='${i}']`);
+                } else {
+                    let ct = document.querySelector("#customcolour");
+                    if (ct && ct.jscolor) ct.jscolor.fromString(hexColor);
+                    newEl = ct;
+                }
             }
             if (select) if (newEl) newEl.classList.add("selected");
 
