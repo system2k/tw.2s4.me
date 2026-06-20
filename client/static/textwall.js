@@ -4508,7 +4508,7 @@
             const Pd = a * Nw + r;
             const Uf = Qm.txt[Pd];
             const Jy = Qm.clr[Pd];
-            const Gh = Jy % 31;
+            const Gh = Jy instanceof Array ? Jy.splice(0, 3) : Jy % 31;
             return {
                 tileCoords: [e, t, r, a],
                 char: Uf,
