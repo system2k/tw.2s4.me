@@ -801,8 +801,7 @@
                                                     e["fillText"](S, Math["round"](w), Math["floor"](M + 15 * y));
                                             else {
                                                 var O = !1;
-                                                Ct && Ct["test"](S) && (O = !0,
-                                                    e["font"] = Nt(y)),
+                                                Ct && Ct["test"](S) && (O = !0),
                                                     null != g && g["charMap"]["has"](B) ? (g["bold"] = P,
                                                         g["italic"] = L,
                                                         Ut(g, e, S, w, M, y, p)) : jt(e, S, w, M, y),
