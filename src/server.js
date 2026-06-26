@@ -2144,9 +2144,19 @@ async function runserver() {
 		let localY = y % 10;
 		if (localY < 0) localY += 10;
 		const index = (localY * 20) + localX;
-		const charCode = typeof char === "string" ? char.charCodeAt(0) : char;
-		const stat = writeChunk(worldId, chunkX, chunkY, index, charCode, color || 0, true);
+		const charCode = typeof char === "string" ? char.codePointAt(0) : char;
+		if (charCode < 0 || charCode > 0x10FFFF) {
+			return res.status(400).json({ success: false, error: "Invalid character code" });
+		}
+		if (charCode >= 0xD800 && charCode <= 0xDFFF) {
+			return res.status(400).json({ success: false, error: "Invalid character code (surrogate)" });
+		}
 
+		const stat = writeChunk(worldId, chunkX, chunkY, index, charCode, color || 0, true);
+		var world = db.prepare("SELECT attributes FROM worlds WHERE id=?").get(worldId);
+		if (world && world.attributes.disableBraille && charCode >= 0x2800 && charCode <= 0x28FF) {
+			return res.status(400).json({ success: false, error: "Braille is disabled in this world" });
+		}
 		if (stat) {
 			worldBroadcast(worldId, encodeMsgpack({
 				e: { e: [[chunkX, chunkY, charCode, index, color || 0]], clientId: -1 }
@@ -2908,7 +2918,7 @@ function init_ws() {
 			return;
 		};
 
-		if (req.headers["sec-websocket-protocol"] !== "3.0.0") {
+		if (req.headers["sec-websocket-protocol"] !== "3.0.7") {
 			ws.close(1000, "Version mismatch");
 			return;
 		}
@@ -3106,7 +3116,7 @@ function init_ws() {
     FROM chathistory 
     WHERE world_id = ? OR channel = 'global'
     ORDER BY timestamp DESC 
-    LIMIT 70
+    LIMIT 200
 `).all(sdata.connectedWorldId);
 
 
@@ -3296,6 +3306,7 @@ function init_ws() {
 
 			} else if ("e" == packetType) { // write edit
 				if (!sdata.isConnected) return;
+				if (!isWhitelisted(sdata.authUser)) return;
 				var edits = data.e;
 				if (!Array.isArray(edits)) return;
 
@@ -3308,6 +3319,7 @@ function init_ws() {
 					send(ws, encodeMsgpack({
 						alert: "Log in to type/edit or send message."
 					}))
+					return;
 				}
 
 				if (sdata.worldAttr.readonly && !sdata.isMember) return;
@@ -3335,10 +3347,20 @@ function init_ws() {
 						if (!Number.isInteger(chr) || !Number.isInteger(idx)) return;
 						if (idx > 200) continue;
 
-
+						if (sdata.worldAttr.disableColor) {
+							var isOwner = sdata.isAuthenticated && (
+								(sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() === sdata.authUser.toLowerCase()) ||
+								(settings.adminList && settings.adminList.includes(sdata.authUser))
+							);
+							if (sdata.isMember || isOwner || sdata.isModerator) {
+								return
+							}
+							colfmt = 0;
+						}
 						if (typeof colfmt === "number") {
 							if (colfmt > 992) continue;
 							if (chr > 1114111) continue;
+							if (sdata.worldAttr.disableBraille && chr >= 0x2800 && chr <= 0x28FF) continue;
 
 							if (chr >= 0xD800 && chr <= 0xDFFF) continue;
 						}
@@ -3369,6 +3391,8 @@ function init_ws() {
 				const rawMsg = data.msg;
 				let messageText;
 				let channel = "world";
+				if (!sdata.isConnected) return;
+				if (!isWhitelisted(sdata.authUser)) return;
 
 				if (typeof rawMsg === "string") {
 					messageText = rawMsg;
@@ -3390,7 +3414,8 @@ function init_ws() {
 				if (!sdata.isAuthenticated && adminSettings.l) {
 					send(ws, encodeMsgpack({
 						alert: "Log in to type/edit or send message."
-					}))
+					}));
+					return;
 				}
 
 				const isMuted = chatMutesByIP[sdata.ipAddr] || (sdata.isAuthenticated && chatMutesByUserIDs[sdata.authUserId]);
@@ -4324,9 +4349,7 @@ function init_ws() {
 			} else
 				if (packetType === "type") {
 					const userId = sdata.userId;
-
 					const channel = data.chatChannel || "world";
-
 					const key = (channel === "global") ? "global" : sdata.connectedWorldId;
 					const isTyping = Boolean(data.typing);
 
@@ -4337,9 +4360,14 @@ function init_ws() {
 					}
 
 					if (isTyping) {
+					
+						const displayName = (sdata.displayName && sdata.displayName.trim() !== "")
+							? sdata.displayName
+							: (sdata.authUser || `${sdata.clientId}`);
+
 						typingUsers[key][userId] = {
 							id: userId,
-							name: sdata.authUser || `${sdata.clientId}`,
+							name: displayName,
 							timeoutId: setTimeout(() => {
 								delete typingUsers[key][userId];
 								broadcastTyping(key, channel);
@@ -4351,7 +4379,6 @@ function init_ws() {
 
 					broadcastTyping(key, channel);
 				}
-
 
 				else if ("cmd" == packetType) {
 					const cmd = data.cmd;
