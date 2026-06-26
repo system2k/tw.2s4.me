@@ -264,7 +264,7 @@
         }
         const ue = 192
             , se = ["#000000", "#898D90", "#D4D7D9", "#FF99AA", "#FF4500", "#FFA800", "#9C6926", "#FFD635", "#7EED56", "#00CC78", "#51E9F4", "#3690EA", "#2450A4", "#B44AC0", "#811E9F", "#BE0039", "#00A368", "#00756F", "#009EAA", "#493AC1", "#6A5CFF", "#FF3881", "#6D482F", "#6D001A", "#FFF8B8", "#00CCC0", "#94B3FF", "#E4ABFF", "#DE107F", "#FFB470", "#515252"]
-            , de = ["black", "gray", "light gray", "light pink", "red", "orange", "brown", "yellow", "light green", "green", "light blue", "blue", "dark blue", "purple", "dark purple", "dark red", "dark green", "dark teal", "teal", "indigo", "periwinkle", "pink", "dark brown", "burgundy", "pale yellow", "light teal", "lavender", "pale purple", "magenta", "beige", "dark grey"]
+            , de = ["black", "gray", "light gray", "light pink", "red", "orange", "brown", "yellow", "light green", "green", "light blue", "blue", "dark blue", "purple", "dark purple", "dark red", "dark green", "dark teal", "teal", "indigo", "periwinkle", "pink", "dark brown", "burgundy", "pale yellow", "light teal", "lavender", "pale purple", "magenta", "beige", "dark gray"]
             , fe = [0, 30, 1, 2, 23, 15, 4, 5, 7, 24, 16, 9, 8, 17, 18, 25, 12, 11, 10, 19, 20, 26, 14, 13, 27, 28, 21, 3, 22, 6, 29];
 
         // addons
@@ -1967,7 +1967,7 @@
         var lastTypingPacket = 0;
 
         function sendTyping(isTyping) {
-            if (localStorage.getItem("typingStatus")==="false") return;
+            if (localStorage.getItem("typingStatus") === "false") return;
             var channel = window.selectedChatTab === 1 ? "global" : "world";
 
             a.send(Or({
@@ -3420,11 +3420,11 @@
         window.prsCol = function (title) {
 
             const titles = [
-                "black", "grey", "light grey", "light pink", "red", "orange", "brown", "yellow",
+                "black", "gray", "light gray", "light pink", "red", "orange", "brown", "yellow",
                 "light green", "green", "light blue", "blue", "dark blue", "purple", "dark purple",
                 "dark red", "dark green", "dark teal", "teal", "indigo", "periwinkle", "pink",
                 "dark brown", "burgundy", "pale yellow", "light teal", "lavender", "pale purple",
-                "magenta", "beige", "dark grey"
+                "magenta", "beige", "dark gray"
             ];
 
 
@@ -4602,7 +4602,8 @@
             const Pd = a * Nw + r;
             const Uf = Qm.txt[Pd];
             const Jy = Qm.clr[Pd];
-            const Gh = Jy % 31;
+            const Gh = Array.isArray(Jy) ? Jy : (Jy % 31);
+
             return {
                 tileCoords: [e, t, r, a],
                 char: Uf,
@@ -4610,7 +4611,6 @@
                 deco: getCharDecoration(Jy)
             };
         };
-
         window.getCharInfoXY = function (e, t) {
             const Rd = Math.floor(e / 20) * 20;
             const Bs = Math.floor(t / 10) * 10;
