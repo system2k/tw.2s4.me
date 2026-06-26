@@ -3854,7 +3854,7 @@
                                 if (Array.isArray(g[1])) {
                                     var rgb = g[1];
                                     d += "[";
-                                    for (var i = 0; i < 3; i++) {
+                                    for (let i = 0; i < 3; i++) {
                                         d += String.fromCharCode(192 + (rgb[i] >> 6)) +
                                             String.fromCharCode(192 + (rgb[i] & 63));
                                     }
