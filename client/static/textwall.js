@@ -102,6 +102,8 @@
             , s = -1 != navigator["userAgent"]["indexOf"]("Firefox")
             , d = u ? 40 : 200
             , f = new Date;
+        var colorsDisabled = false;
+        var brailleDisabled = false;
         var v = devicePixelRatio
             , m = !1
             , h = document["title"]
@@ -262,8 +264,9 @@
         }
         const ue = 192
             , se = ["#000000", "#898D90", "#D4D7D9", "#FF99AA", "#FF4500", "#FFA800", "#9C6926", "#FFD635", "#7EED56", "#00CC78", "#51E9F4", "#3690EA", "#2450A4", "#B44AC0", "#811E9F", "#BE0039", "#00A368", "#00756F", "#009EAA", "#493AC1", "#6A5CFF", "#FF3881", "#6D482F", "#6D001A", "#FFF8B8", "#00CCC0", "#94B3FF", "#E4ABFF", "#DE107F", "#FFB470", "#515252"]
-            , de = ["black", "grey", "light grey", "light pink", "red", "orange", "brown", "yellow", "light green", "green", "light blue", "blue", "dark blue", "purple", "dark purple", "dark red", "dark green", "dark teal", "teal", "indigo", "periwinkle", "pink", "dark brown", "burgundy", "pale yellow", "light teal", "lavender", "pale purple", "magenta", "beige", "dark grey"]
+            , de = ["black", "gray", "light gray", "light pink", "red", "orange", "brown", "yellow", "light green", "green", "light blue", "blue", "dark blue", "purple", "dark purple", "dark red", "dark green", "dark teal", "teal", "indigo", "periwinkle", "pink", "dark brown", "burgundy", "pale yellow", "light teal", "lavender", "pale purple", "magenta", "beige", "dark grey"]
             , fe = [0, 30, 1, 2, 23, 15, 4, 5, 7, 24, 16, 9, 8, 17, 18, 25, 12, 11, 10, 19, 20, 26, 14, 13, 27, 28, 21, 3, 22, 6, 29];
+
         // addons
         const rgbse = [
             [200, 50, 50],     // muted red
@@ -279,7 +282,7 @@
             [180, 180, 180],   // light silver/gray
             [120, 120, 120],   // muted gray
             [60, 130, 130],    // teal-ish
-            [50, 120, 60],     // dark green
+            [50, 120, 60],     // depp forest green
             [130, 50, 50],     // muted maroon
             [50, 50, 120],     // muted navy
             [220, 200, 50],    // soft gold
@@ -300,9 +303,9 @@
             "soft cyan",        // [70,200,200]
             "pink-magenta",     // [200,100,180]
             "light silver",     // [180,180,180]
-            "muted gray",       // [120,120,120]
+            "muted grey",       // [120,120,120]
             "teal-ish",         // [60,130,130]
-            "dark green",       // [50,120,60]
+            "deep forest green",// [50,120,60]
             "muted maroon",     // [130,50,50]
             "muted navy",       // [50,50,120]
             "soft gold",        // [220,200,50]
@@ -396,7 +399,8 @@
             fadeInMsg: document.getElementById("fadeInMsg"),
             //doNotChangeTheme: document.getElementById("doNotChangeTheme")
             hueSpeed: document.getElementById("hueSpeed"),
-            rainbowMode: document.getElementById("rainbowMode")
+            rainbowMode: document.getElementById("rainbowMode"),
+            showTypingStatus: document.getElementById("showTypingStatus")
         };
         tt.showothercurs["checked"] = !0,
             tt["shownametags"]["checked"] = !0,
@@ -410,6 +414,7 @@
             tt["roundCursors"].checked = !0,
             tt["displayNames"].checked = !1,
             tt["fadeInMsg"].checked = !0;
+        tt["showTypingStatus"].checked = !0;
         tt.hueSpeed.value = localStorage.getItem("hueSpeed") ?? 5;
         tt.rainbowMode.value = localStorage.getItem("rainbowMode") ?? "legacy";
         /* tt["doNotChangeTheme"].checked = !1;*/
@@ -687,7 +692,7 @@
         }
         function Nt(e) {
             var t = n;
-            return Math["round"](0 * e) + "px Courier"
+            return Math["round"](16 * e) + "px Courier"
         }
         function jt(e, t, r, a, o) {
             var i = n;
@@ -1208,6 +1213,7 @@
             document["addEventListener"]("pointerleave", Un),
             document["addEventListener"]("pointercancel", Un),
             i["addEventListener"]("input", (function (e) {
+
                 var t = n;
                 if (e.preventDefault(),
                     e["isTrusted"]) {
@@ -1496,7 +1502,7 @@
                         break;
                     case tt["showchat"]:
                         localStorage["setItem"]("showchat", r),
-                            e["target"]["checked"] ? null : hn.classList["add"]("hidden");
+                            e["target"]["checked"] ? hn.classList["remove"]("hidden") : hn.classList["add"]("hidden");
                         break;
                     case tt.disablecolour:
                         localStorage.setItem("disablecolour", r),
@@ -1539,6 +1545,9 @@
                     case tt.fadeInMsg:
                         localStorage["setItem"]("fadeInMsg", r);
                         break;
+                    case tt.showTypingStatus:
+                        localStorage["setItem"]("typingStatus", r)
+                        break;
                     /* case tt.doNotChangeTheme:
                          localStorage["setItem"]("doNotChangeTheme", r);
                          break;*/
@@ -1555,7 +1564,32 @@
                 }
             }
             )),
-            st["addEventListener"]("click", dt)
+            document.getElementById("oldprng").addEventListener("click", function (e) {
+                localStorage.setItem("oldPrng", e.target.checked);
+                var t = document.getElementById("tpword").value.replace(/^\/|\/$/g, "");
+                var r;
+
+                if (t == "0" || t === "" || t.startsWith("~")) {
+                    r = { x: 0, y: 0 };
+                } else {
+                    if (document.getElementById("oldprng").checked) {
+                        r = oldLr(t);
+                    } else {
+                        r = Lr(t);
+                    }
+                }
+
+                if (document.getElementById("tpx")) {
+                    document.getElementById("tpx").value = r.x;
+                }
+                if (document.getElementById("tpy")) {
+                    document.getElementById("tpy").value = -r.y;
+                }
+            });
+
+        document.getElementById("oldprng").checked = localStorage.getItem("oldPrng") === "true";
+        tt.showTypingStatus.checked = localStorage.getItem("typingStatus") === "true";
+        st["addEventListener"]("click", dt)
         document["getElementById"]("closeteleport").addEventListener("click", (function () {
             var e = n;
             M.classList["remove"]("open")
@@ -1569,17 +1603,27 @@
                     r.blur()
             }
             )),
-            document["getElementById"]("tpword")["addEventListener"]("input", (function () {
-                var e = n
-                    , t = document["getElementById"]("tpword").value["replace"](/^\/|\/$/g, "")
-                    , r = 0 == t || t["startsWith"]("~") ? {
-                        x: 0,
-                        y: 0
-                    } : Lr(t);
-                document["getElementById"]("tpx")["value"] = r.x,
-                    document["getElementById"]("tpy")["value"] = -r.y
-            }
-            )),
+            document.getElementById("tpword").addEventListener("input", function () {
+                var t = document.getElementById("tpword").value.replace(/^\/|\/$/g, "");
+                var r;
+
+                if (t == "0" || t === "" || t.startsWith("~")) {
+                    r = { x: 0, y: 0 };
+                } else {
+                    if (document.getElementById("oldprng").checked) {
+                        r = oldLr(t);
+                    } else {
+                        r = Lr(t);
+                    }
+                }
+
+                if (document.getElementById("tpx")) {
+                    document.getElementById("tpx").value = r.x;
+                }
+                if (document.getElementById("tpy")) {
+                    document.getElementById("tpy").value = -r.y;
+                }
+            }),
             document["getElementById"]("tpcoordgo").addEventListener("click", (function (e) {
                 var t = n;
                 e["preventDefault"]();
@@ -1923,6 +1967,7 @@
         var lastTypingPacket = 0;
 
         function sendTyping(isTyping) {
+            if (localStorage.getItem("typingStatus")==="false") return;
             var channel = window.selectedChatTab === 1 ? "global" : "world";
 
             a.send(Or({
@@ -2027,13 +2072,13 @@
                     return;
                 }
 
-// /help
+                // /help
                 if (cmd === "help") {
                     send("/block <id|anon|user>, /blockuser <name>, /unblock <id|anon|user>, /unblockuser <name>, /unblockall, /day, /night, /help");
                     return;
                 }
             }
-        
+
             var channel = (typeof t == "number") ? (t === 1 ? "global" : "world") : t;
             var chatData = { msg: [e, channel] };
             window.w.emit("chatBefore", chatData);
@@ -2274,7 +2319,7 @@
         let hue = 0;
         window.w = {};
         window.position = qe;
-        window.w.currentVersion = "3.0.0";
+        window.w.currentVersion = "3.0.7";
         window.w.displayNick = "(none)";
         window.elem = tt;
         window.w.chatHistory = [];
@@ -2452,7 +2497,7 @@
             row.id = "_msg";
 
             const nameLink = document.createElement("a");
-            nameLink.title = (displayNick ? `Username: ${displayNick}\n` : "") + `Timestamp: ${new Date(timestamp).toLocaleString()}`;
+            nameLink.title = (displayNick ? `Username: ${nick}\n` : "") + `Timestamp: ${new Date(timestamp).toLocaleString()}`;
             nameLink.innerText = displayNick ? displayNick : nick;
 
             if (tag) {
@@ -2474,7 +2519,11 @@
             }
 
             row.appendChild(nameLink);
+<<<<<<< HEAD
             row.appendChild(parseColoredMessage(" ~ " + msg, false));
+=======
+            row.appendChild(parseColoredMessage(" ~ " + msg, html));
+>>>>>>> ce2d58a (Fixes + Feats)
 
             const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 2;
 
@@ -2622,6 +2671,7 @@
                     }
                     window.w.emit("edit", {
                         edits: a.e.e,
+                        clientId: a.e.clientId
                     })
                     break;
                 case "chunks":
@@ -2865,7 +2915,8 @@
 
                                 var l = document.createElement("a");
                                 var constructTitle = (p) => {
-                                    return (p.displayNick ? `Username: ${p.displayNick}\n` : "") + `Timestamp: ${new Date(p.timestamp).toLocaleString()}`;
+
+                                    return (p.displayNick ? `Username: ${e}\n` : "") + `Timestamp: ${new Date(p.timestamp).toLocaleString()}`;
                                 }
                                 l.title = constructTitle({ displayNick, timestamp });
                                 l.innerText = displayNick ? displayNick : e;
@@ -2893,7 +2944,7 @@
 
                                 i.appendChild(c);
 
-                                while (i.children.length > 70) {
+                                while (i.children.length > 3500) {
                                     i.removeChild(i.firstChild);
                                 }
 
@@ -2949,11 +3000,13 @@
                     nt["disableColour"]["checked"] = L,
                         hr(!!L || tt["disablecolour"]["checked"]);
                     window.w.emit("disablecolor", L);
+                    colorsDisabled = !!L;
                     break;
                 case "db":
                     var O = a.db;
                     nt["disableBraille"]["checked"] = O;
                     window.w.emit("disablebraille", O);
+                    brailleDisabled = !!O;
                     break;
                 case "un":
                     var un = a.un;
@@ -3019,7 +3072,7 @@
                         nt.disableChat["disabled"] =
                         nt["disableColour"]["disabled"] =
                         nt["disableBraille"].disabled =
-                        nt["unlisted"].disabled = 
+                        nt["unlisted"].disabled =
                         nt["regonly"].disabled =
                         nt["webhook"].disabled =
                         nt["nsfw"].disabled = !(2 == j || m),
@@ -3494,7 +3547,15 @@
         };
 
         window.writeCharAt = writeCharAt;
+<<<<<<< HEAD
         function writeCharAt(char, color, coordX, coordY, decos, doNotAddToUndoBuffer) {
+=======
+        function writeCharAt(char, color, coordX, coordY, r) {
+            var cdp = e.codePointAt(0);
+            if (brailleDisabled && (cdp < 0x2800 || cdp > 0x28FF)) {
+                return;
+            }
+>>>>>>> ce2d58a (Fixes + Feats)
             var Ce = { x: coordX, y: coordY }
             var o = n;
             if (ie(!1),
@@ -3589,7 +3650,10 @@
         }
         window.ce2 = ce2;
         function Vn(e, t, r) {
-
+            var cdp = e.codePointAt(0);
+            if (brailleDisabled && (cdp < 0x2800 || cdp > 0x28FF)) {
+                return;
+            }
             var o = n;
             if (ie(!1),
                 performance["now"]() - qn >= 15 && (qn = performance.now(),
@@ -4106,13 +4170,38 @@
                     Cn("textwall", "main"),
                     0 == c.x && 0 == c.y ? $n() : history["pushState"]({}, null, e)
             }
+            document.querySelectorAll(".typing-notice").forEach(el => el.innerText = "nobody is typing.");
             M["classList"]["remove"]("open")
         }
 
-
         function mr(e, noSave = false, select = true) {
+            if (colorsDisabled) return;
+            if (tt.disablecolour.checked) { e = 0 };
             let hexColor = null;
             let newEl = null;
+
+            if (typeof e === "string" && (e.startsWith("#") || e.startsWith("0x"))) {
+                let cleanHex = e.startsWith("0x") ? e.slice(2) : e.slice(1);
+                if (cleanHex.length === 3) {
+                    cleanHex = cleanHex.split('').map(char => char + char).join('');
+                }
+                if (/^[0-9A-Fa-f]{6}$/.test(cleanHex)) {
+                    let r = parseInt(cleanHex.substring(0, 2), 16);
+                    let g = parseInt(cleanHex.substring(2, 4), 16);
+                    let b = parseInt(cleanHex.substring(4, 6), 16);
+                    e = [r, g, b];
+                }
+            }
+            if (typeof e === "string" && e.startsWith("rgb")) {
+                let rgbMatch = e.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                if (rgbMatch) {
+                    let r = parseInt(rgbMatch[1], 10);
+                    let g = parseInt(rgbMatch[2], 10);
+                    let b = parseInt(rgbMatch[3], 10);
+                    e = [r, g, b];
+                }
+            }
+
             if (Array.isArray(e)) {
                 if (e.length >= 3) {
                     let r = e[0] & 255,
@@ -4122,27 +4211,25 @@
                         g.toString(16).padStart(2, "0") +
                         b.toString(16).padStart(2, "0");
                 } else return;
-            } else if (typeof e === "string" && e.startsWith("#")) {
-                hexColor = e;
             } else {
                 e = parseInt(e, 10);
             }
+
             if (select) {
-                // remove selection from palette swatches
                 document.querySelectorAll(".swatch-p.selected").forEach(el => el.classList.remove("selected"));
-                // remove selection from addon swatches
                 document.querySelectorAll(".swatch-a.selected").forEach(el => el.classList.remove("selected"));
-                // remove selection from custom color
                 const custom = document.querySelector("#customcolour.selected, .customcolour.selected");
                 if (custom) custom.classList.remove("selected");
             }
+
             pe = e;
             window.color = pe;
-            if (typeof e === "number" && e < se.length) {
+
+            if (typeof e === "number" && !isNaN(e) && e < se.length) {
                 be = xe && e === 0 ? "rgba(255,255,255,0.6)" : Yr(se[e], 0.6);
                 newEl = document.querySelector(`.swatch-p[data-index='${e}']`);
             }
-            else if (typeof e === "number" && e >= se.length) {
+            else if (typeof e === "number" && !isNaN(e) && e >= se.length) {
                 let addonIndex = e - se.length;
                 let obj = rgbse[addonIndex];
                 if (obj) {
@@ -4156,13 +4243,13 @@
                 if (ct && ct.jscolor) ct.jscolor.fromString(hexColor);
                 newEl = ct;
             }
-            if (select) if (newEl) newEl.classList.add("selected");
+
+            if (select && newEl) newEl.classList.add("selected");
 
             if (!noSave) localStorage.setItem("col", e);
             ge = true;
             Oe = true;
         }
-
 
         let total = se.length + rgbse.length;
 
@@ -4170,9 +4257,25 @@
         sr();
 
         function hr(e) {
-            for (var t = n, r = 0; r < w.children.length; r++)
-                "0" != w["children"][r].id && (e ? w["children"][r]["classList"].add("hidden") : w["children"][r].classList.remove("hidden"));
-            e && mr(0)
+            for (var t = n, r = 0; r < w.children.length; r++) {
+                if (w["children"][r].getAttribute("data-index") != "0") {
+                    if (e) {
+                        w["children"][r]["classList"].add("hidden");
+                    } else {
+                        w["children"][r].classList.remove("hidden");
+                    }
+                }
+            }
+            var customColour = document.getElementById("customcolour");
+            if (customColour) {
+                if (e) {
+                    customColour.classList.add("hidden");
+                } else {
+                    customColour.classList.remove("hidden");
+                }
+            }
+
+            e && mr(0);
         }
         function yr(e, noSave = !1) {
             var t = n;
@@ -4851,7 +4954,92 @@
                 y: axis(tpl.maxY, 10)
             };
         }
+
+        function oldLr(input) {
+            let normalized = decodeURI((input || "").toLowerCase());
+            if (normalized === "" || normalized === "~main") {
+                return { x: 0, y: 0 };
+            }
+
+            var rand = (function (seed) {
+                var key = [];
+                var seedStr = seed + "";
+                var len = seedStr.length;
+                var xorState = 0;
+
+
+                for (var i = 0; i < len; i++) {
+                    key[255 & i] = 255 & (xorState ^= 19 * key[255 & i]) + seedStr.codePointAt(i);
+                }
+
+                var keyLen = key.length;
+                if (!keyLen) {
+                    key = [keyLen++];
+                }
+
+
+                var sBox = [];
+                for (var s = 0; s < 256; s++) {
+                    sBox[s] = s;
+                }
+
+
+                var j = 0;
+                for (var s = 0; s < 256; s++) {
+                    var temp = sBox[s];
+                    j = 255 & (j + key[s % keyLen] + temp);
+                    sBox[s] = sBox[j];
+                    sBox[j] = temp;
+                }
+
+
+                var iState = 0;
+                var jState = 0;
+
+                var nextByte = function (count) {
+                    var output = 0;
+                    while (count--) {
+                        iState = 255 & (iState + 1);
+                        var t = sBox[iState];
+                        jState = 255 & (jState + t);
+
+                        sBox[iState] = sBox[jState];
+                        sBox[jState] = t;
+
+                        output = 256 * output + sBox[255 & (sBox[iState] + sBox[jState])];
+                    }
+                    return output;
+                };
+                nextByte(256);
+
+                return function () {
+                    var e = nextByte(6);
+                    var t = 281474976710656;
+                    var n = 0;
+
+                    while (e < 4503599627370496) {
+                        e = 256 * (e + n);
+                        t *= 256;
+                        n = nextByte(1);
+                    }
+                    while (e >= 9007199254740992) {
+                        e /= 2;
+                        t /= 2;
+                        n >>>= 1;
+                    }
+                    return (e + n) / t;
+                };
+            })(normalized);
+            var rawX = Math.floor(200000 * rand()) - 100000;
+            var rawY = Math.floor(200000 * rand()) - 100000;
+
+            return {
+                x: 20 * Math.floor(rawX / 20),
+                y: 10 * Math.floor(rawY / 10)
+            };
+        }
         window.w.generateCoords = Lr;
+        window.w.generateCoordsOld = oldLr;
         null != Br.x && (Ce.x = parseInt(Br.x),
             Fr = !0),
             null != Br.y && (Ce.y = -1 * parseInt(Br.y),
