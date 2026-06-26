@@ -3548,9 +3548,13 @@
 
         window.writeCharAt = writeCharAt;
 <<<<<<< HEAD
+<<<<<<< HEAD
         function writeCharAt(char, color, coordX, coordY, decos, doNotAddToUndoBuffer) {
 =======
         function writeCharAt(char, color, coordX, coordY, r) {
+=======
+        function writeCharAt(char, color, coordX, coordY, doNotAddToUndoBuffer) {
+>>>>>>> 2c9af70 (Rename argument)
             var cdp = e.codePointAt(0);
             if (brailleDisabled && (cdp < 0x2800 || cdp > 0x28FF)) {
                 return;
