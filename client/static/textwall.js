@@ -3494,8 +3494,7 @@
         };
 
         window.writeCharAt = writeCharAt;
-        function writeCharAt(char, color, coordX, coordY, r) {
-
+        function writeCharAt(char, color, coordX, coordY, decos, r) {
             var Ce = { x: coordX, y: coordY }
             var o = n;
             if (ie(!1),
@@ -3503,7 +3502,8 @@
                     zn = 0),
                 !e || zn >= 3)
                 return 0;
-            var decos2 = ce2();
+                
+            if (!decos) decos = {};
             var chr = prsFmt(color);
             var data = {
                 char,
@@ -3516,7 +3516,7 @@
                 strikethrough: chr.strikethrough
             };
             window.w.emit("writeBefore", data);
-            var newColFmt = Array.isArray(data.color) ? colFmt(data.color, decos2) : colFmt(data.color, decos2);
+            var newColFmt = colFmt(data.color, decos);
             Ce.x = data.x;
             Ce.y = data.y;
             char = data.char;
