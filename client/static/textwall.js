@@ -2519,11 +2519,7 @@
             }
 
             row.appendChild(nameLink);
-<<<<<<< HEAD
             row.appendChild(parseColoredMessage(" ~ " + msg, false));
-=======
-            row.appendChild(parseColoredMessage(" ~ " + msg, html));
->>>>>>> ce2d58a (Fixes + Feats)
 
             const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 2;
 
@@ -3547,19 +3543,11 @@
         };
 
         window.writeCharAt = writeCharAt;
-<<<<<<< HEAD
-<<<<<<< HEAD
         function writeCharAt(char, color, coordX, coordY, decos, doNotAddToUndoBuffer) {
-=======
-        function writeCharAt(char, color, coordX, coordY, r) {
-=======
-        function writeCharAt(char, color, coordX, coordY, doNotAddToUndoBuffer) {
->>>>>>> 2c9af70 (Rename argument)
-            var cdp = e.codePointAt(0);
+            var cdp = char.codePointAt(0);
             if (brailleDisabled && (cdp < 0x2800 || cdp > 0x28FF)) {
                 return;
             }
->>>>>>> ce2d58a (Fixes + Feats)
             var Ce = { x: coordX, y: coordY }
             var o = n;
             if (ie(!1),
