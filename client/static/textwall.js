@@ -454,7 +454,7 @@
             , st = document.getElementById("logoutlink");
         function dt(e, t) {
             var r = n;
-            (localStorage.removeItem("username"),
+            e && (localStorage.removeItem("username"),
                 localStorage["removeItem"]("token")),
                 je = "",
                 j = 0,
@@ -2265,6 +2265,7 @@
                 clearInterval(he),
                 clearInterval(ye),
                 nr(),
+                dt(!1),
                 document["getElementById"]("connecting1").innerText = "Disconnected.",
                 document["getElementById"]("connecting2")["innerText"] = "Click anywhere to reconnect.";
             document["getElementById"]("connecting3").innerHTML = reason;
