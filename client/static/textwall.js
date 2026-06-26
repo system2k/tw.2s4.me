@@ -3543,7 +3543,7 @@
         };
 
         window.writeCharAt = writeCharAt;
-        function writeCharAt(char, color, coordX, coordY, r) {
+        function writeCharAt(char, color, coordX, coordY, doNotAddToUndoBuffer) {
             var cdp = e.codePointAt(0);
             if (brailleDisabled && (cdp < 0x2800 || cdp > 0x28FF)) {
                 return;
