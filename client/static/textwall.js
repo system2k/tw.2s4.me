@@ -4160,6 +4160,7 @@
 
             if (!noSave) localStorage.setItem("col", e);
             ge = true;
+            Oe = true;
         }
 
 
