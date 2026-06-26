@@ -3494,7 +3494,7 @@
         };
 
         window.writeCharAt = writeCharAt;
-        function writeCharAt(char, color, coordX, coordY, decos, r) {
+        function writeCharAt(char, color, coordX, coordY, decos, doNotAddToUndoBuffer) {
             var Ce = { x: coordX, y: coordY }
             var o = n;
             if (ie(!1),
@@ -3565,7 +3565,7 @@
             return L == e && T == C || Qn(e, I) && Qn(L, P) || (M = P,
                 k = e,
                 E = I,
-                Gn(L) && Gn(k) && (2 & M) == (2 & E) && (1 & M) == (1 & E) && colorMatch) || (r ? (g = Ce.x,
+                Gn(L) && Gn(k) && (2 & M) == (2 & E) && (1 & M) == (1 & E) && colorMatch) || (doNotAddToUndoBuffer ? (g = Ce.x,
                     p = Ce.y,
                     b = s["txt"][A],
                     x = T,
