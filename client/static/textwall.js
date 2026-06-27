@@ -3248,7 +3248,7 @@
                     d.appendChild(f),
                     s["appendChild"](d)
             }
-            if (W == je["toLowerCase"]()) {
+            if (W.toLowerCase() == je["toLowerCase"]()) {
                 var m = q["appendChild"](document["createElement"]("form"));
                 m.style["display"] = "flex",
                     m.style["justifyContent"] = "space-between";
