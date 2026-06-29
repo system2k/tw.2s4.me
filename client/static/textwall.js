@@ -801,8 +801,7 @@
                                                     e["fillText"](S, Math["round"](w), Math["floor"](M + 15 * y));
                                             else {
                                                 var O = !1;
-                                                Ct && Ct["test"](S) && (O = !0,
-                                                    e["font"] = Nt(y)),
+                                                Ct && Ct["test"](S) && (O = !0),
                                                     null != g && g["charMap"]["has"](B) ? (g["bold"] = P,
                                                         g["italic"] = L,
                                                         Ut(g, e, S, w, M, y, p)) : jt(e, S, w, M, y),
@@ -4508,7 +4507,7 @@
             const Pd = a * Nw + r;
             const Uf = Qm.txt[Pd];
             const Jy = Qm.clr[Pd];
-            const Gh = Jy % 31;
+            const Gh = Jy instanceof Array ? Jy.splice(0, 3) : Jy % 31;
             return {
                 tileCoords: [e, t, r, a],
                 char: Uf,
