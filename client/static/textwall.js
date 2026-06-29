@@ -687,7 +687,7 @@
         }
         function Nt(e) {
             var t = n;
-            return Math["round"](0 * e) + "px Courier"
+            return Math["round"](14 * e) + "px Courier"
         }
         function jt(e, t, r, a, o) {
             var i = n;
@@ -1494,9 +1494,9 @@
                         localStorage.setItem("shownametags", r),
                             ge = !0;
                         break;
-                    case tt["showchat"]:
+                    case tt["showchat"]: // u forgot classList.remove sir?
                         localStorage["setItem"]("showchat", r),
-                            e["target"]["checked"] ? null : hn.classList["add"]("hidden");
+                            e["target"]["checked"] ? hn.classList.remove("hidden") : hn.classList["add"]("hidden");
                         break;
                     case tt.disablecolour:
                         localStorage.setItem("disablecolour", r),
@@ -2179,7 +2179,8 @@
             document["getElementById"]("connecting1")["innerText"] = "Connected.",
                 document["getElementById"]("connecting2")["innerText"] = "",
                 document["getElementById"]("admin")["style"]["display"] = "none",
-                "" == je && null != localStorage["getItem"]("username") && null != localStorage["getItem"]("token") && (vn(!0),
+                // bug: "" == je returns false because it's not empty when logged in
+                /* "" == je */ && null != localStorage["getItem"]("username") && null != localStorage["getItem"]("token") && (vn(!0),
                     a["send"](Or({
                         token: [localStorage["getItem"]("username"), localStorage["getItem"]("token")]
                     })));
@@ -3854,7 +3855,7 @@
                                 if (Array.isArray(g[1])) {
                                     var rgb = g[1];
                                     d += "[";
-                                    for (var i = 0; i < 3; i++) {
+                                    for (let i = 0; i < 3; i++) {
                                         d += String.fromCharCode(192 + (rgb[i] >> 6)) +
                                             String.fromCharCode(192 + (rgb[i] & 63));
                                     }
@@ -4470,12 +4471,13 @@
             }
 
             const Kf = a * Rn + r;
-            return Vz.clr[Kf] % 31;
+            const Og = Vz.clr[Kf]
+            return Array.isArray(Og) ? Og.slice(0, 3) : Og % 31;
         };
 
         window.getCharDecoration = function (e) {
 
-            const Lj = Math.floor(e / 31);
+            const Lj = Array.isArray(e) ? e[3] : Math.floor(e / 31);
             return {
 
                 bold: (Lj & 8) == 8,
@@ -4508,12 +4510,12 @@
             const Pd = a * Nw + r;
             const Uf = Qm.txt[Pd];
             const Jy = Qm.clr[Pd];
-            const Gh = Jy % 31;
+            const Gh = Zu ? Jy.slice(0, 3) : Jy % 31;
             return {
                 tileCoords: [e, t, r, a],
                 char: Uf,
                 color: Gh,
-                deco: getCharDecoration(Jy)
+                deco: getCharDecoration(Zu)
             };
         };
 
