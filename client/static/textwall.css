@@ -1236,7 +1236,7 @@ td {
 }
 @font-face {
   font-family: 'Consolas';
-  src: url('fonts/CONSOLA.ttf') format('truetype');
+  src: url('fonts/CONSOLA.TTF') format('truetype');
   font-weight: 400;
   font-style: normal;
 }
@@ -2001,3 +2001,6 @@ input[type="color"]:active {
     color: rgb(255, 0, 0);
 }
 
+#vers {
+    font-style: italic;
+}
