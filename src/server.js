@@ -2924,7 +2924,12 @@ function init_ws() {
 		}
 
 		if (settings.maintenance) {
-			ws.close(1000, "Maintenance")
+			let msg = settings.maintenanceMsg ? `Maintenance: ${settings.maintenanceMsg}` : "Maintenance";
+			if (msg.length > 123) {
+				msg = msg.substring(0, 120) + "...";
+			}
+
+			ws.close(1000, msg);
 		}
 
 		console.log("New client:", ipAddr);
@@ -3111,35 +3116,46 @@ function init_ws() {
 				sdata.connectedWorldNamespace = world.namespace;
 				sdata.connectedWorldName = world.name;
 				sdata.connectedWorldId = world.id;
+				
 				var rows = db.prepare(`
-    SELECT username, message, isAdmin, isAuth, channel, tag, timestamp, color 
-    FROM chathistory 
-    WHERE world_id = ? OR channel = 'global'
-    ORDER BY timestamp DESC 
-    LIMIT 200
+    SELECT * FROM (
+        SELECT username, message, isAdmin, isAuth, channel, tag, timestamp, color 
+        FROM chathistory 
+        WHERE world_id = ? AND channel != 'global'
+        ORDER BY timestamp DESC 
+        LIMIT 200
+    )
+    UNION ALL
+    SELECT * FROM (
+        SELECT username, message, isAdmin, isAuth, channel, tag, timestamp, color 
+        FROM chathistory 
+        WHERE channel = 'global'
+        ORDER BY timestamp DESC 
+        LIMIT 200
+    )
+    ORDER BY timestamp DESC
 `).all(sdata.connectedWorldId);
+				const chathistory = rows.reverse().map(row => {
+					let colorValue = row.color;
+					if (typeof colorValue === "string" && colorValue.includes(",")) {
+						colorValue = colorValue.split(",").map(Number);
+					}
 
-
+					return [
+						row.username,           // nickName
+						colorValue,             // colorIndex / RGB Array
+						row.message,            // msgText
+						!!row.isAuth,           // !!isAuthFlag
+						!!row.isAdmin,          // !!isAdminFlag
+						row.channel,            // channelName
+						row.username,           // displayNick
+						row.timestamp,          // timestamp
+						row.tag                 // tag
+					];
+				});
 				send(ws, encodeMsgpack({
-					chathistory: rows.reverse().map(row => {
-						let colorValue = row.color;
-						if (typeof colorValue === "string" && colorValue.includes(",")) {
-							colorValue = colorValue.split(",").map(Number);
-						}
-
-						return [
-							row.username,           // nickName
-							colorValue,             // colorIndex / RGB Array
-							row.message,            // msgText
-							!!row.isAuth,           // !!isAuthFlag (from row.isAuth)
-							!!row.isAdmin,          // !!isAdminFlag
-							row.channel,            // channelName
-							row.username,           // displayNick
-							row.timestamp,          // timestamp
-							row.tag                 // tag
-						];
-					})
-				}))
+					chathistory
+				}));
 
 				send(ws, encodeMsgpack({
 					j: [sdata.connectedWorldNamespace, sdata.connectedWorldName]
@@ -3469,7 +3485,7 @@ function init_ws() {
 				let isCommand = false;
 				let commandResponse = "***";
 
-				if (messageText.startsWith("/") && sdata.isAuthenticated && (isAdmin || (sdata.authUser === "textwall" && sdata.isModerator))) {
+				if (messageText.startsWith("/") && sdata.isAuthenticated && (isAdmin || (sdata.authUser === "textwall" || sdata.isModerator))) {
 					isCommand = true;
 					const parts = messageText.trim().split(/\s+/);
 					const command = parts[0].slice(1).toLowerCase();
@@ -3608,7 +3624,7 @@ function init_ws() {
 								break;
 
 							case "newid":
-								const newId = parseInt(args[0], 10);
+								const newId = args[0];
 								if (!newId) {
 									commandResponse = "HEY! YOU DIDN'T GIVE ME AN ID!"
 								} else {
@@ -3622,34 +3638,6 @@ function init_ws() {
 									dumpCursors(ws);
 									send(ws, encodeMsgpack({ id: sdata.clientId }));
 									commandResponse = `Your ID has changed to ${sdata.clientId}`;
-								}
-								break;
-
-							case "fakemsg":
-								if (args.length < 5) {
-									commandResponse = "HEY! YOU DIDN'T GIVE ME ANY ARGUMENTS!";
-									break;
-								}
-								const fNick = args[0].trim();
-								const fColor = Number(args[1]);
-								const fAuth = args[2].toLowerCase();
-								const fChnl = args[3].toLowerCase();
-								const fMsg = args.slice(4).join(" ").trim();
-
-								if (!fNick || fNick.length > 48) commandResponse = !fNick ? "HEY! INVALID NICKNAME!" : "HEY! THAT NAME IS TOO LONG!";
-								else if (isNaN(fColor)) commandResponse = "HEY! COLOR MUST BE A NUMBER!";
-								else if (fAuth !== "true" && fAuth !== "false") commandResponse = "HEY! AUTH MUST BE 'true' OR 'false'!";
-								else if (!fMsg || fMsg.length > 255) commandResponse = !fMsg ? "HEY! YOU DIDN'T GIVE ME A MESSAGE TO SEND!" : "HEY! YOUR MESSAGE IS TOO LONG!";
-								else {
-									try {
-										worldBroadcast(sdata.connectedWorldId, encodeMsgpack({
-											msg: [fNick, fColor, fMsg, fAuth === "true", false, ["world", "global"].includes(fChnl) ? fChnl : "world"]
-										}));
-										commandResponse = "";
-									} catch (err) {
-										console.error(err);
-										commandResponse = "ERROR: FAILED TO SEND MESSAGE! IT'S YOUR FAULT FOR SENDING SOMETHING WEIRD!";
-									}
 								}
 								break;
 						}
@@ -4360,7 +4348,7 @@ function init_ws() {
 					}
 
 					if (isTyping) {
-					
+
 						const displayName = (sdata.displayName && sdata.displayName.trim() !== "")
 							? sdata.displayName
 							: (sdata.authUser || `${sdata.clientId}`);
@@ -4794,10 +4782,14 @@ var banInt = setInterval(() => {
 
 process.once("SIGINT", function () {
 	console.log("Server is closing, saving...");
+
 	clearInterval(memClrInterval);
 	clearInterval(saveMuteInterval);
 	clearInterval(banInt);
 	commitChunks();
+	if (wss && wss.clients) {
+		wss.clients.forEach(e => e.close(1000, "Server shutting down"));
+	}
 	process.exit();
 });
 

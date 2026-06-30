@@ -2074,7 +2074,28 @@
 
                 // /help
                 if (cmd === "help") {
-                    send("/block <id|anon|user>, /blockuser <name>, /unblock <id|anon|user>, /unblockuser <name>, /unblockall, /day, /night, /help");
+                    send("/block <id|anon|user>, /blockuser <name>, /unblock <id|anon|user>, /unblockuser <name>, /unblockall, /day, /night, /nick, /help");
+                    return;
+                }
+                if (cmd === "nick") {
+                    var nickname = args[1];
+
+                    if (!nickname) {
+                        network.send({
+                            nick: ""
+                        });
+                        send("Your nickname has been reset.")
+                        return;
+                    }
+
+                    if (nickname.length > 64) {
+                        send("Nickname must be under 64 characters.");
+                        return;
+                    }
+
+                    send("Your nickname has been set to " + nickname)
+
+                    network.send({ nick: nickname });
                     return;
                 }
             }
@@ -2320,6 +2341,7 @@
         window.w = {};
         window.position = qe;
         window.w.currentVersion = "3.0.7";
+        document.getElementById("vers").innerText = "Version: " + window.w.currentVersion;
         window.w.displayNick = "(none)";
         window.elem = tt;
         window.w.chatHistory = [];
@@ -3555,7 +3577,7 @@
                     zn = 0),
                 !e || zn >= 3)
                 return 0;
-                
+
             if (!decos) decos = {};
             var chr = prsFmt(color);
             var data = {
@@ -3591,6 +3613,7 @@
             tt.rainbow["checked"] && !r && (
                 tt.rainbowMode.value === "legacy" ? (mr(Jn[Yn]), ++Yn == Jn.length && (Yn = 0)) :
                     (() => {
+                        if (tt.hueSpeed.value < 0) {ir("Invalid hex speed.", 3000); return;}
                         let h = (window.cH = ((window.cH || 0) + (tt.hueSpeed?.value ? parseFloat(tt.hueSpeed.value) : 2)) % 360);
                         let s = 100, l = 50;
                         let c = (1 - Math.abs(2 * l / 100 - 1)) * (s / 100);
@@ -3686,6 +3709,7 @@
             tt.rainbow["checked"] && !r && (
                 tt.rainbowMode.value === "legacy" ? (mr(Jn[Yn]), ++Yn == Jn.length && (Yn = 0)) :
                     (() => {
+                        if (tt.hueSpeed.value < 0) {ir("Invalid hex speed.", 3000); return;}
                         let h = (window.cH = ((window.cH || 0) + (tt.hueSpeed?.value ? parseFloat(tt.hueSpeed.value) : 2)) % 360),
                             X = (1 - Math.abs((h / 60) % 2 - 1)),
                             [r, g, b] = h < 60 ? [1, X, 0] : h < 120 ? [X, 1, 0] : h < 180 ? [0, 1, X] : h < 240 ? [0, X, 1] : h < 300 ? [X, 0, 1] : [1, 0, X];
@@ -4546,6 +4570,25 @@
             return Xq.txt[Tp];
         };
 
+        window.getCharDecoration = function (e) {
+            let Lj = 0;
+
+            if (Array.isArray(e)) {
+
+                Lj = e.length > 3 ? e[3] : 0;
+            } else {
+
+                Lj = Math.floor(e / 31);
+            }
+
+            return {
+                bold: (Lj & 8) === 8,
+                italic: (Lj & 4) === 4,
+                underline: (Lj & 2) === 2,
+                strike: (Lj & 1) === 1
+            };
+        };
+
         window.getCharColor = function (e, t, r = 0, a = 0) {
             if (e === undefined || t === undefined || r === undefined || a === undefined) {
                 [e, t, r, a] = window.cursorCoords;
@@ -4567,19 +4610,8 @@
             }
 
             const Kf = a * Rn + r;
-            return Vz.clr[Kf] % 31;
-        };
-
-        window.getCharDecoration = function (e) {
-
-            const Lj = Math.floor(e / 31);
-            return {
-
-                bold: (Lj & 8) == 8,
-                italic: (Lj & 4) == 4,
-                underline: (Lj & 2) == 2,
-                strike: (Lj & 1) == 1
-            };
+            const Jy = Vz.clr[Kf];
+            return Array.isArray(Jy) ? Jy.slice(0, 3) : (Jy % 31);
         };
 
         window.getCharInfo = function (e, t, r = 0, a = 0) {
@@ -4605,7 +4637,7 @@
             const Pd = a * Nw + r;
             const Uf = Qm.txt[Pd];
             const Jy = Qm.clr[Pd];
-            const Gh = Array.isArray(Jy) ? Jy : (Jy % 31);
+            const Gh = Array.isArray(Jy) ? Jy.slice(0, 3) : (Jy % 31);
 
             return {
                 tileCoords: [e, t, r, a],

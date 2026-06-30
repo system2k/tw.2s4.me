@@ -18,7 +18,7 @@
     },
     "maintenance": false,
     "maintenanceMsg": "The site is currently under maintenance. We apologize for the inconvenience.",
-    "adminList": [],
+    "adminList": ["lc"],
     "moderatorList": [],
     "version": "3.0.7"
 }
