@@ -3238,7 +3238,9 @@
                         var others = typingInfo.users.filter(u => u.id != window.w.clientId);
 
                         if (others.length > 0) {
-                            var names = others.map(u => u.name).join(", ");
+                            var names = others
+                                .map(u => u.name.length > 10 ? u.name.substring(0, 10) + "..." : u.name)
+                                .join(", ");
                             var suffix = others.length === 1 ? " is typing..." : " are typing...";
                             el.innerText = names + suffix;
                         } else {
@@ -3613,7 +3615,7 @@
             tt.rainbow["checked"] && !r && (
                 tt.rainbowMode.value === "legacy" ? (mr(Jn[Yn]), ++Yn == Jn.length && (Yn = 0)) :
                     (() => {
-                        if (tt.hueSpeed.value < 0) {ir("Invalid hex speed.", 3000); return;}
+                        if (tt.hueSpeed.value < 0) { ir("Invalid hex speed.", 3000); return; }
                         let h = (window.cH = ((window.cH || 0) + (tt.hueSpeed?.value ? parseFloat(tt.hueSpeed.value) : 2)) % 360);
                         let s = 100, l = 50;
                         let c = (1 - Math.abs(2 * l / 100 - 1)) * (s / 100);
@@ -3709,7 +3711,7 @@
             tt.rainbow["checked"] && !r && (
                 tt.rainbowMode.value === "legacy" ? (mr(Jn[Yn]), ++Yn == Jn.length && (Yn = 0)) :
                     (() => {
-                        if (tt.hueSpeed.value < 0) {ir("Invalid hex speed.", 3000); return;}
+                        if (tt.hueSpeed.value < 0) { ir("Invalid hex speed.", 3000); return; }
                         let h = (window.cH = ((window.cH || 0) + (tt.hueSpeed?.value ? parseFloat(tt.hueSpeed.value) : 2)) % 360),
                             X = (1 - Math.abs((h / 60) % 2 - 1)),
                             [r, g, b] = h < 60 ? [1, X, 0] : h < 120 ? [X, 1, 0] : h < 180 ? [0, 1, X] : h < 240 ? [0, X, 1] : h < 300 ? [X, 0, 1] : [1, 0, X];

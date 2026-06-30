@@ -36,6 +36,7 @@ h3 {
     padding: 0;
     margin: 0;
     justify-content: stretch;
+    text-overflow: ellipsis;
 }
 
 .typing-notice.active {
@@ -1782,28 +1783,6 @@ input[type="color"]:active {
 #toggled {
     display: none;
     align-items: center;
-}
-
-.soggy /* JOKKEEEEE */ {
-    z-index: 9999999999999999;
-    width: 100%;
-    height: 100%;
-    position: fixed;
-     visibility: hidden;
-    transition: opacity 5s ease, visibility 0s linear 5s;
-    opacity: 0;
-}
-.soggy.show {
-    opacity: 1;
-    visibility: visible;
-    transition: opacity 5s ease;
-}
-.soggy > img {
-    width: 100%;
-    height: 100%;
-    object-fit: stretch;
-    display: block;
-    
 }
 
 
