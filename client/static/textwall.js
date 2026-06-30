@@ -4757,6 +4757,7 @@
                     E["fillRect"](x, w, r, a)
                 }
                 var anonIdShow = tt['anonIdShow'].checked;
+                var displayNameShow = tt["displayNames"].checked;
                 if (tt.roundCursors["checked"] ? (E["fillStyle"] = be,
                     E.beginPath(),
                     E.lineWidth = 2 * v,
