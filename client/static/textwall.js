@@ -3569,8 +3569,8 @@
         window.writeCharAt = writeCharAt;
         function writeCharAt(char, color, coordX, coordY, decos, doNotAddToUndoBuffer) {
             var cdp = char.codePointAt(0);
-            if (brailleDisabled && (cdp < 0x2800 || cdp > 0x28FF)) {
-                return;
+            if (brailleDisabled && cdp >= 0x2800 && cdp <= 0x28FF) {
+                 return;
             }
             var Ce = { x: coordX, y: coordY }
             var o = n;
@@ -3668,8 +3668,8 @@
         window.ce2 = ce2;
         function Vn(e, t, r) {
             var cdp = e.codePointAt(0);
-            if (brailleDisabled && (cdp < 0x2800 || cdp > 0x28FF)) {
-                return;
+            if (brailleDisabled && cdp >= 0x2800 && cdp <= 0x28FF) {
+                   return;
             }
             var o = n;
             if (ie(!1),
