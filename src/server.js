@@ -3373,19 +3373,18 @@ function init_ws() {
 							}
 							colfmt = 0;
 						}
-						if (typeof colfmt === "number") {
-							if (colfmt > 992) continue;
-							if (chr > 1114111) continue;
+						if (chr > 1114111) continue;
 							if (sdata.worldAttr.disableBraille && chr >= 0x2800 && chr <= 0x28FF) continue;
 
 							if (chr >= 0xD800 && chr <= 0xDFFF) continue;
+						
+						if (typeof colfmt === "number") {
+							if (colfmt > 992) continue;
 						}
 
 						else if (Array.isArray(colfmt)) {
-							if (colfmt.length < 3) continue;
-
-							if (colfmt.length !== 4) colfmt.push(0);
-
+							if (colfmt.length < 3 || colfmt.length > 4) continue;
+                            if (colfmt.length < 4) colfmt.push(0);
 							if (typeof colfmt[3] !== "number") continue;
 							if (colfmt[3] > 0b1111) continue;
 							if (colfmt.some(c => typeof c !== "number" || c < 0 || c > 255)) continue;
