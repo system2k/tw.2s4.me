@@ -3374,6 +3374,7 @@ function init_ws() {
 							colfmt = 0;
 						}
 						if (chr > 1114111) continue;
+						if (chr < 0) continue;
 							if (sdata.worldAttr.disableBraille && chr >= 0x2800 && chr <= 0x28FF) continue;
 
 							if (chr >= 0xD800 && chr <= 0xDFFF) continue;
