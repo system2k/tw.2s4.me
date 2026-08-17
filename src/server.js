@@ -2460,11 +2460,11 @@ function flushCache() {
 		delete chunkCache[t];
 	}
 }
-
-function getChunk(worldId, x, y, canCreate) {
-	var getChunkStmt = db.prepare(
+var getChunkStmt = db.prepare(
 		"SELECT * FROM chunks WHERE world_id=? AND x=? AND y=?"
-	)
+)
+function getChunk(worldId, x, y, canCreate) {
+
 	var tuple = worldId + "," + x + "," + y;
 
 	if (chunkCache[tuple]) {
@@ -3325,6 +3325,7 @@ function init_ws() {
 				if (!isWhitelisted(sdata.authUser)) return;
 				var edits = data.e;
 				if (!Array.isArray(edits)) return;
+				if (edits.length > 8) return;
 
 				if (canvasMuted(sdata) && !settings.adminList.includes(sdata.authUser) && sdata.authUser !== "textwall") {
 					send(ws, encodeMsgpack({ alert: "You are muted in canvas" }));
@@ -3347,6 +3348,8 @@ function init_ws() {
 				for (var i = 0; i < edits.length; i++) {
 					var chunk = edits[i];
 					if (!Array.isArray(chunk)) continue;
+					if (chunk.length < 5 || chunk.length > 32) return;
+
 					var x = chunk[0], y = chunk[1];
 					if (!Number.isInteger(x) || !Number.isInteger(y)) return;
 
@@ -3354,43 +3357,43 @@ function init_ws() {
 					resp.push(obj);
 
 					for (var j = 0; j < Math.floor((chunk.length - 2) / 3); j++) {
-						if (ecount > rateLimits.e) return;
+					if (ecount >= rateLimits.e) return;
 
-						var chr = chunk[j * 3 + 2];
-						var idx = chunk[j * 3 + 3];
-						var colfmt = chunk[j * 3 + 4];
+					var chr = chunk[j * 3 + 2];
+					var idx = chunk[j * 3 + 3];
+					var colfmt = chunk[j * 3 + 4];
 
-						if (!Number.isInteger(chr) || !Number.isInteger(idx)) return;
-						if (idx > 200) continue;
+					if (!Number.isInteger(chr) || !Number.isInteger(idx)) return;
+					if (idx > 200) continue;
 
-						if (sdata.worldAttr.disableColor) {
-							var isOwner = sdata.isAuthenticated && (
-								(sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() === sdata.authUser.toLowerCase()) ||
-								(settings.adminList && settings.adminList.includes(sdata.authUser))
-							);
-							if (sdata.isMember || isOwner || sdata.isModerator) {
-								return
-							}
-							colfmt = 0;
-						}
+					if (sdata.worldAttr.disableColor) {
+						var isOwner = sdata.isAuthenticated && (
+							(sdata.connectedWorldNamespace && sdata.connectedWorldNamespace.toLowerCase() === sdata.authUser.toLowerCase()) ||
+							(settings.adminList && settings.adminList.includes(sdata.authUser))
+						);
+					if (sdata.isMember || isOwner || sdata.isModerator) {
+						return;
+					}
+					colfmt = 0;
+					}
+
 						if (chr > 1114111) continue;
 						if (chr < 0) continue;
-							if (sdata.worldAttr.disableBraille && chr >= 0x2800 && chr <= 0x28FF) continue;
+						if (sdata.worldAttr.disableBraille && chr >= 0x2800 && chr <= 0x28FF) continue;
+						if (chr >= 0xD800 && chr <= 0xDFFF) continue;
 
-							if (chr >= 0xD800 && chr <= 0xDFFF) continue;
-						
 						if (typeof colfmt === "number") {
 							if (colfmt > 992) continue;
 						}
-
 						else if (Array.isArray(colfmt)) {
-							if (colfmt.length < 3 || colfmt.length > 4) continue;
-                            if (colfmt.length < 4) colfmt.push(0);
-							if (typeof colfmt[3] !== "number") continue;
-							if (colfmt[3] > 0b1111) continue;
-							if (colfmt.some(c => typeof c !== "number" || c < 0 || c > 255)) continue;
+						if (colfmt.length < 3 || colfmt.length > 4) continue;
+						if (colfmt.length < 4) colfmt.push(0);
+						if (typeof colfmt[3] !== "number") continue;
+						if (colfmt[3] > 0b1111) continue;
+						if (colfmt.some(c => typeof c !== "number" || c < 0 || c > 255)) continue;
 						}
 						else continue;
+
 						var stat = writeChunk(sdata.connectedWorldId, x, y, idx, chr, colfmt, sdata.isMember);
 						if (stat) {
 							obj.push(chr, idx, colfmt);
