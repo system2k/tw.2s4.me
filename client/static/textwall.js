@@ -1053,7 +1053,7 @@
                     null != Dn && 1 != e.pointerId || Nn || (Dn = e["pointerId"],
                         Te = Wn(e),
                         Je ? ($e["start"] = Te,
-                            $e["end"] = $e.start) : (Ye = !0,
+                            $e["end"] = Object.assign({}, $e.start)) : (Ye = !0,
                                 qe["start"].x = e["clientX"] * v,
                                 qe["start"].y = e["clientY"] * v,
                                 Ge = [],
@@ -1076,7 +1076,15 @@
                                         Hn()
                                     }
                                 }(e)),
-                        ge = !0))
+                        ge = !0));
+                        if (Je && currentRegionSelection.tiled) {
+                            $e.start.tileX = Math.floor($e.start.x / 20);
+                            $e.start.tileY = Math.floor($e.start.y / 10);
+                            $e.start.x = $e.start.tileX * 20;
+                            $e.start.y = $e.start.tileY * 10;
+                            $e.end.x = $e.start.x + 19;
+                            $e.end.y = $e.start.y + 9;
+                        }
         }
         )),
             k["addEventListener"]("contextmenu", (function (e) {
