@@ -2078,7 +2078,7 @@
                     return;
                 }
                 if (cmd === "nick") {
-                    var nickname = args[1];
+                    var nickname = args.slice(1).join(" ").trim();
 
                     if (!nickname) {
                         network.send({
@@ -2518,9 +2518,14 @@
             const row = document.createElement("p");
             row.id = "_msg";
 
-            const nameLink = document.createElement("a");
-            nameLink.title = (displayNick ? `Username: ${nick}\n` : "") + `Timestamp: ${new Date(timestamp).toLocaleString()}`;
-            nameLink.innerText = displayNick ? displayNick : nick;
+           const escapeLines = str => String(str).replace(/\r/g, "\\r").replace(/\n/g, "\\n");
+
+           const name = escapeLines(nick);
+           displayNick = displayNick ? escapeLines(displayNick) : "";
+
+           const nameLink = document.createElement("a");
+           nameLink.title = (displayNick ? `Username: ${name}\n` : "") + `Timestamp: ${new Date(timestamp).toLocaleString()}`;
+           nameLink.innerText = displayNick || name;
 
             if (tag) {
                 const tSpan = document.createElement("span");
