@@ -3244,7 +3244,13 @@
 
                         if (others.length > 0) {
                             var names = others
-                                .map(u => u.name.length > 10 ? u.name.substring(0, 10) + "..." : u.name)
+                                .map(u => {
+                                    var sanitized = (u.name || "")
+                                    .replace(/\n/g, '\\n')
+                                    .replace(/\r/g, '\\r')
+                                    .replace(/\t/g, '\\t');
+                                    return sanitized.length > 10 ? sanitized.substring(0, 10) + "..." : sanitized;
+                                })
                                 .join(", ");
                             var suffix = others.length === 1 ? " is typing..." : " are typing...";
                             el.innerText = names + suffix;
