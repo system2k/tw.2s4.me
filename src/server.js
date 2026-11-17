@@ -36,7 +36,7 @@ var ipBans = JSON.parse(fs.readFileSync(settings.db.ipBansPath));
 function saveIpBans() {
 	try {
 		const data = JSON.stringify(ipBans, null, 4);
-		fs.writeFileSync(ipBans, data, 'utf8');
+		fs.writeFileSync(settings.db.ipBansPath, data, 'utf8');
 	} catch (error) {
 		throw error;
 	}
@@ -77,6 +77,13 @@ function loadAdminSettings() {
 		Object.assign(adminSettings, JSON.parse(fs.readFileSync(adminSettingsPath)));
 	} catch {
 		throw new Error("Could not load admin settings file");
+	}
+}
+function saveAdminSettings() {
+	try {
+		fs.writeFileSync(adminSettingsPath, JSON.stringify(adminSettings, null, 4), 'utf8');
+	} catch (error) {
+		throw error;
 	}
 }
 loadAdminSettings();
@@ -1624,7 +1631,7 @@ async function runserver() {
 
 	createAdminRequest("ratelimit/toggle", (req, res) => {
 		adminSettings.rateLimit = Boolean(req.body.toggle);
-		saveSettings();
+		saveAdminSettings();
 		res.json({ success: true, enabled: Boolean(adminSettings.rateLimit) });
 	}, { post: true });
 
@@ -1642,7 +1649,7 @@ async function runserver() {
 				return res.status(400).json({ success: false, error: `Invalid packet key or value: ${key}` });
 			}
 		}
-		saveSettings();
+		saveAdminSettings();
 		res.json({ success: true, rateLimits: adminSettings.rateLimits });
 	});
 
@@ -1654,7 +1661,7 @@ async function runserver() {
 		const { l, regclosed } = req.body;
 		if (typeof l === 'boolean') adminSettings.l = l;
 		if (typeof regclosed === 'boolean') adminSettings.regclosed = regclosed;
-		saveSettings();
+		saveAdminSettings();
 		res.json({ success: true, settings: { l: adminSettings.l, regclosed: adminSettings.regclosed } });
 	});
 	createAdminRequest("settings/get", (req, res) => {
@@ -1790,6 +1797,7 @@ async function runserver() {
 
 		if (!ipBans.includes(ipToBan)) {
 			ipBans.push(ipToBan);
+			saveIpBans();
 		}
 
 		wss.clients.forEach(ws => {
@@ -1812,6 +1820,7 @@ async function runserver() {
 		const index = ipBans.indexOf(ip);
 		if (index > -1) {
 			ipBans.splice(index, 1);
+			saveIpBans();
 		}
 		res.json({ success: true });
 	});
@@ -2460,9 +2469,13 @@ function flushCache() {
 		delete chunkCache[t];
 	}
 }
-var getChunkStmt = db.prepare(
+var getChunkStmt;
+
+function prep() {
+	getChunkStmt = db.prepare(
 		"SELECT * FROM chunks WHERE world_id=? AND x=? AND y=?"
-)
+	);
+}
 function getChunk(worldId, x, y, canCreate) {
 
 	var tuple = worldId + "," + x + "," + y;
@@ -4688,6 +4701,7 @@ async function initServer() {
 			})
 		);
 	}
+	prep();
 	runserver();
 }
 initServer();
