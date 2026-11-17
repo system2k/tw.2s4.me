@@ -1204,7 +1204,12 @@ td {
   font-weight: 700;
   font-style: italic;
 }
-
+@font-face {
+  font-family: 'Noto Sans Mono';
+  src: url('fonts/NotoSansMono-VariableFont_wdth\,wght.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
 @font-face {
   font-family: 'Menlo';
   src: url('fonts/Menlo-Regular.ttf') format('truetype');
@@ -1228,6 +1233,18 @@ td {
   src: url('fonts/Monaco.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
+}
+@font-face {
+  font-family: 'DM Mono';
+  src: url('fonts/DMMono-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DM Mono';
+  src: url('fonts/DMMono-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
 }
 @font-face {
   font-family: 'Andale Mono';
