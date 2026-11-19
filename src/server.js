@@ -4339,11 +4339,11 @@ function init_ws() {
 					pong: true
 				}));
 			} else if ("nick" == packetType) {
+				if (typeof newNick != "string") return;
 				var newNick = data.nick.trim()
 				.replace(/\n/g, '\\n')
         		.replace(/\r/g, '\\r')
         		.replace(/\t/g, '\\t');
-				if (typeof newNick != "string") return;
 				if (newNick.length > 64) return;
 
 				// make new nick for user
